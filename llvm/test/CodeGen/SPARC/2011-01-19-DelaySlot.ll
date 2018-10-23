@@ -57,6 +57,7 @@ define i32 @test_inlineasm(i32 %a) #0 {
 entry:
 ;CHECK-LABEL:      test_inlineasm:
 ;CHECK: cmp
+;CHECK-NEXT: mov
 ;CHECK:      sethi
 ;CHECK:      !NO_APP
 ;CHECK-NEXT: ble
@@ -86,22 +87,6 @@ entry:
 ;UNOPT-NEXT:  nop
   %0 = tail call i32 @func(ptr undef) nounwind
   ret i32 0
-}
-
-define i32 @prevent_o7_in_call_delay_slot(i32 %i0) #0 {
-entry:
-;CHECK-LABEL:       prevent_o7_in_call_delay_slot:
-;CHECK:       add %i0, 2, %o5
-;CHECK:       add %i0, 3, %o7
-;CHECK:       add %o5, %o7, %o0
-;CHECK:       call bar
-;CHECK-NEXT:  nop
-  %0 = add nsw i32 %i0, 2
-  %1 = add nsw i32 %i0, 3
-  tail call void asm sideeffect "", "r,r,~{l0},~{l1},~{l2},~{l3},~{l4},~{l5},~{l6},~{l7},~{i0},~{i1},~{i2},~{i3},~{i4},~{i5},~{i6},~{i7},~{o0},~{o1},~{o2},~{o3},~{o4},~{o6},~{g1},~{g2},~{g3},~{g4},~{g5},~{g6},~{g7}"(i32 %0, i32 %1)
-  %2 = add nsw i32 %0, %1
-  %3 = tail call i32 @bar(i32 %2)
-  ret i32 %3
 }
 
 

@@ -59,8 +59,8 @@ entry:
 ; CHECK-LABEL:      leaf_proc_with_local_array:
 ; CHECK:      add %sp, -104, %sp
 ; CHECK:      mov 1, [[R1:%[go][0-7]]]
-; CHECK:      st [[R1]], [%sp+96]
 ; CHECK:      mov 2, [[R2:%[go][0-7]]]
+; CHECK:      st [[R1]], [%sp+96]
 ; CHECK:      st [[R2]], [%sp+100]
 ; CHECK:      ld {{.+}}, %o0
 ; CHECK:      retl
@@ -85,7 +85,15 @@ entry:
 
 ; CHECK-LABEL: leaf_proc_give_up
 ; CHECK: save %sp, -96, %sp
+; CHECK: mov %i1, %o0
 ; CHECK: ld [%fp+92], %o5
+<<<<<<< HEAD
+=======
+; CHECK: mov %i0, %g1
+; CHECK: mov %i2, %o1
+; CHECK: mov %i3, %o2
+; CHECK: mov %i4, %o3
+>>>>>>> d90959f9b0f6 ([Sparc] Enable anti-dependency breaker pass)
 ; CHECK: mov %i5, %o4
 ; CHECK: mov %i4, %o3
 ; CHECK: mov %i3, %o2

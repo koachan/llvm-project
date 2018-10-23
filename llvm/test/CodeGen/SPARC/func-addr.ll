@@ -31,10 +31,10 @@ entry:
 ; abs44:          call %i0+%l44(func1)
 
 ; abs64-LABEL:   test
-; abs64:          sethi %hi(func1), %i0
-; abs64:          add %i0, %lo(func1), %i0
 ; abs64:          sethi %hh(func1), %i1
+; abs64:          sethi %hi(func1), %i0
 ; abs64:          add %i1, %hm(func1), %i1
+; abs64:          add %i0, %lo(func1), %i0
 
 ; v8pic32-LABEL: test
 ; v8pic32:        sethi %hi(func1), %i1

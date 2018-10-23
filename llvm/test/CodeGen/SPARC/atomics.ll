@@ -77,22 +77,22 @@ entry:
 ; SPARC-LABEL: test_cmpxchg_i8
 ; SPARC:       and %o1, -4, %o2
 ; SPARC:       mov  3, %o3
-; SPARC:       andn %o3, %o1, %o1
-; SPARC:       sll %o1, 3, %o1
-; SPARC:       mov  255, %o3
-; SPARC:       sll %o3, %o1, %o5
-; SPARC:       xor %o5, -1, %o3
 ; SPARC:       mov  123, %o4
-; SPARC:       ld [%o2], %g2
-; SPARC:       sll %o4, %o1, %o4
 ; SPARC:       and %o0, 255, %o0
+; SPARC:       ld [%o2], %g2
+; SPARC:       andn %o3, %o1, %o1
+; SPARC:       mov  255, %o3
+; SPARC:       sll %o1, 3, %o1
+; SPARC:       sll %o3, %o1, %o5
+; SPARC:       sll %o4, %o1, %o4
 ; SPARC:       sll %o0, %o1, %o0
+; SPARC:       xor %o5, -1, %o3
 ; SPARC:       andn %g2, %o5, %o5
 ; SPARC:      [[LABEL1:\.L.*]]:
 ; SPARC:       or %o5, %o4, %g2
 ; SPARC:       or %o5, %o0, %g3
-; SPARC:       cas [%o2], %g3, %g2
 ; SPARC:       mov %g0, %g4
+; SPARC:       cas [%o2], %g3, %g2
 ; SPARC:       cmp %g2, %g3
 ; SPARC:       move %icc, 1, %g4
 ; SPARC:       cmp %g4, 0
@@ -108,22 +108,22 @@ entry:
 ; SPARC64-LABEL: test_cmpxchg_i8
 ; SPARC64:       and %o1, -4, %o2
 ; SPARC64:       mov  3, %o3
-; SPARC64:       andn %o3, %o1, %o1
-; SPARC64:       sll %o1, 3, %o1
-; SPARC64:       mov  255, %o3
-; SPARC64:       sll %o3, %o1, %o5
-; SPARC64:       xor %o5, -1, %o3
 ; SPARC64:       mov  123, %o4
-; SPARC64:       ld [%o2], %g2
-; SPARC64:       sll %o4, %o1, %o4
 ; SPARC64:       and %o0, 255, %o0
+; SPARC64:       ld [%o2], %g2
+; SPARC64:       andn %o3, %o1, %o1
+; SPARC64:       mov  255, %o3
+; SPARC64:       sll %o1, 3, %o1
+; SPARC64:       sll %o3, %o1, %o5
+; SPARC64:       sll %o4, %o1, %o4
 ; SPARC64:       sll %o0, %o1, %o0
+; SPARC64:       xor %o5, -1, %o3
 ; SPARC64:       andn %g2, %o5, %o5
 ; SPARC64:      [[LABEL1:\.L.*]]:
 ; SPARC64:       or %o5, %o4, %g2
 ; SPARC64:       or %o5, %o0, %g3
-; SPARC64:       cas [%o2], %g3, %g2
 ; SPARC64:       mov %g0, %g4
+; SPARC64:       cas [%o2], %g3, %g2
 ; SPARC64:       cmp %g2, %g3
 ; SPARC64:       move %icc, 1, %g4
 ; SPARC64:       cmp %g4, 0
@@ -146,23 +146,23 @@ entry:
 ; SPARC-LABEL: test_cmpxchg_i16
 ; SPARC:       and %o1, -4, %o2
 ; SPARC:       and %o1, 3, %o1
-; SPARC:       xor %o1, 2, %o1
-; SPARC:       sll %o1, 3, %o1
 ; SPARC:       sethi 63, %o3
-; SPARC:       or %o3, 1023, %o4
-; SPARC:       sll %o4, %o1, %o5
-; SPARC:       xor %o5, -1, %o3
-; SPARC:       and %o0, %o4, %o4
 ; SPARC:       ld [%o2], %g2
+; SPARC:       xor %o1, 2, %o1
+; SPARC:       or %o3, 1023, %o4
+; SPARC:       sll %o1, 3, %o1
+; SPARC:       sll %o4, %o1, %o5
+; SPARC:       and %o0, %o4, %o4
 ; SPARC:       mov  123, %o0
+; SPARC:       xor %o5, -1, %o3
 ; SPARC:       sll %o0, %o1, %o0
 ; SPARC:       sll %o4, %o1, %o4
 ; SPARC:       andn %g2, %o5, %o5
 ; SPARC:      [[LABEL1:\.L.*]]:
 ; SPARC:       or %o5, %o0, %g2
 ; SPARC:       or %o5, %o4, %g3
-; SPARC:       cas [%o2], %g3, %g2
 ; SPARC:       mov %g0, %g4
+; SPARC:       cas [%o2], %g3, %g2
 ; SPARC:       cmp %g2, %g3
 ; SPARC:       move %icc, 1, %g4
 ; SPARC:       cmp %g4, 0
@@ -178,23 +178,23 @@ entry:
 ; SPARC64-LABEL: test_cmpxchg_i16
 ; SPARC64:       and %o1, -4, %o2
 ; SPARC64:       and %o1, 3, %o1
-; SPARC64:       xor %o1, 2, %o1
-; SPARC64:       sll %o1, 3, %o1
 ; SPARC64:       sethi 63, %o3
-; SPARC64:       or %o3, 1023, %o4
-; SPARC64:       sll %o4, %o1, %o5
-; SPARC64:       xor %o5, -1, %o3
-; SPARC64:       and %o0, %o4, %o4
 ; SPARC64:       ld [%o2], %g2
+; SPARC64:       xor %o1, 2, %o1
+; SPARC64:       or %o3, 1023, %o4
+; SPARC64:       sll %o1, 3, %o1
+; SPARC64:       sll %o4, %o1, %o5
+; SPARC64:       and %o0, %o4, %o4
 ; SPARC64:       mov  123, %o0
+; SPARC64:       xor %o5, -1, %o3
 ; SPARC64:       sll %o0, %o1, %o0
 ; SPARC64:       sll %o4, %o1, %o4
 ; SPARC64:       andn %g2, %o5, %o5
 ; SPARC64:      [[LABEL1:\.L.*]]:
 ; SPARC64:       or %o5, %o0, %g2
 ; SPARC64:       or %o5, %o4, %g3
-; SPARC64:       cas [%o2], %g3, %g2
 ; SPARC64:       mov %g0, %g4
+; SPARC64:       cas [%o2], %g3, %g2
 ; SPARC64:       cmp %g2, %g3
 ; SPARC64:       move %icc, 1, %g4
 ; SPARC64:       cmp %g4, 0

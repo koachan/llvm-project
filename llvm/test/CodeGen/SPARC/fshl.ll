@@ -8,17 +8,17 @@ define <2 x i64> @fshl_v2i64(<2 x i64> %x, <2 x i64> %y, <2 x i64> %z) {
 ; CHECK-NEXT:    .register %g3, #scratch
 ; CHECK-NEXT:  ! %bb.0: ! %bb
 ; CHECK-NEXT:    mov 63, %g2
-; CHECK-NEXT:    andn %g2, %o4, %g3
 ; CHECK-NEXT:    srlx %o2, 1, %o2
-; CHECK-NEXT:    srlx %o2, %g3, %o2
+; CHECK-NEXT:    srlx %o3, 1, %o3
+; CHECK-NEXT:    andn %g2, %o4, %g3
 ; CHECK-NEXT:    and %o4, 63, %o4
 ; CHECK-NEXT:    sllx %o0, %o4, %o0
+; CHECK-NEXT:    srlx %o2, %g3, %o2
+; CHECK-NEXT:    andn %g2, %o5, %o4
+; CHECK-NEXT:    and %o5, 63, %o5
 ; CHECK-NEXT:    or %o0, %o2, %o0
-; CHECK-NEXT:    andn %g2, %o5, %o2
-; CHECK-NEXT:    srlx %o3, 1, %o3
-; CHECK-NEXT:    srlx %o3, %o2, %o2
-; CHECK-NEXT:    and %o5, 63, %o3
-; CHECK-NEXT:    sllx %o1, %o3, %o1
+; CHECK-NEXT:    srlx %o3, %o4, %o2
+; CHECK-NEXT:    sllx %o1, %o5, %o1
 ; CHECK-NEXT:    retl
 ; CHECK-NEXT:    or %o1, %o2, %o1
 bb:

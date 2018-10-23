@@ -83,8 +83,8 @@ define void @test_fpextend_fp128(ptr %p, ptr %out) nounwind {
 ; V8-OPT-NEXT:    save %sp, -112, %sp
 ; V8-OPT-NEXT:    call __extendhfsf2
 ; V8-OPT-NEXT:    lduh [%i0], %o0
-; V8-OPT-NEXT:    st %f0, [%fp+-20]
 ; V8-OPT-NEXT:    add %fp, -16, %i0
+; V8-OPT-NEXT:    st %f0, [%fp+-20]
 ; V8-OPT-NEXT:    st %i0, [%sp+64]
 ; V8-OPT-NEXT:    call _Q_stoq
 ; V8-OPT-NEXT:    ld [%fp+-20], %o0
@@ -127,8 +127,8 @@ define void @test_fpextend_fp128(ptr %p, ptr %out) nounwind {
 ; V9-NEXT:    save %sp, -112, %sp
 ; V9-NEXT:    call __extendhfsf2
 ; V9-NEXT:    lduh [%i0], %o0
-; V9-NEXT:    st %f0, [%fp+-20]
 ; V9-NEXT:    add %fp, -16, %i0
+; V9-NEXT:    st %f0, [%fp+-20]
 ; V9-NEXT:    st %i0, [%sp+64]
 ; V9-NEXT:    call _Q_stoq
 ; V9-NEXT:    ld [%fp+-20], %o0
@@ -329,12 +329,20 @@ define void @test_fadd(ptr %p, ptr %q) nounwind {
 ; V8-OPT-LABEL: test_fadd:
 ; V8-OPT:       ! %bb.0:
 ; V8-OPT-NEXT:    save %sp, -104, %sp
+<<<<<<< HEAD
 ; V8-OPT-NEXT:    lduh [%i0], %i2
 ; V8-OPT-NEXT:    call __extendhfsf2
 ; V8-OPT-NEXT:    lduh [%i1], %o0
 ; V8-OPT-NEXT:    st %f0, [%fp+-8] ! 4-byte Folded Spill
 ; V8-OPT-NEXT:    call __extendhfsf2
 ; V8-OPT-NEXT:    mov %i2, %o0
+=======
+; V8-OPT-NEXT:    call __extendhfsf2
+; V8-OPT-NEXT:    lduh [%i0], %o0
+; V8-OPT-NEXT:    lduh [%i1], %o0
+; V8-OPT-NEXT:    call __extendhfsf2
+; V8-OPT-NEXT:    st %f0, [%fp+-8]
+>>>>>>> d90959f9b0f6 ([Sparc] Enable anti-dependency breaker pass)
 ; V8-OPT-NEXT:    ld [%fp+-8], %f1 ! 4-byte Folded Reload
 ; V8-OPT-NEXT:    fadds %f0, %f1, %f0
 ; V8-OPT-NEXT:    st %f0, [%fp+-4]
@@ -366,12 +374,20 @@ define void @test_fadd(ptr %p, ptr %q) nounwind {
 ; V9-LABEL: test_fadd:
 ; V9:       ! %bb.0:
 ; V9-NEXT:    save %sp, -104, %sp
+<<<<<<< HEAD
 ; V9-NEXT:    lduh [%i0], %i2
 ; V9-NEXT:    call __extendhfsf2
 ; V9-NEXT:    lduh [%i1], %o0
 ; V9-NEXT:    st %f0, [%fp+-8] ! 4-byte Folded Spill
 ; V9-NEXT:    call __extendhfsf2
 ; V9-NEXT:    mov %i2, %o0
+=======
+; V9-NEXT:    call __extendhfsf2
+; V9-NEXT:    lduh [%i0], %o0
+; V9-NEXT:    lduh [%i1], %o0
+; V9-NEXT:    call __extendhfsf2
+; V9-NEXT:    st %f0, [%fp+-8]
+>>>>>>> d90959f9b0f6 ([Sparc] Enable anti-dependency breaker pass)
 ; V9-NEXT:    ld [%fp+-8], %f1 ! 4-byte Folded Reload
 ; V9-NEXT:    fadds %f0, %f1, %f0
 ; V9-NEXT:    st %f0, [%fp+-4]
@@ -384,12 +400,20 @@ define void @test_fadd(ptr %p, ptr %q) nounwind {
 ; SPARC64-LABEL: test_fadd:
 ; SPARC64:       ! %bb.0:
 ; SPARC64-NEXT:    save %sp, -192, %sp
+<<<<<<< HEAD
 ; SPARC64-NEXT:    lduh [%i0], %i2
 ; SPARC64-NEXT:    call __extendhfsf2
 ; SPARC64-NEXT:    lduh [%i1], %o0
 ; SPARC64-NEXT:    st %f0, [%fp+2043] ! 4-byte Folded Spill
 ; SPARC64-NEXT:    call __extendhfsf2
 ; SPARC64-NEXT:    mov %i2, %o0
+=======
+; SPARC64-NEXT:    call __extendhfsf2
+; SPARC64-NEXT:    lduh [%i0], %o0
+; SPARC64-NEXT:    lduh [%i1], %o0
+; SPARC64-NEXT:    call __extendhfsf2
+; SPARC64-NEXT:    st %f0, [%fp+2043]
+>>>>>>> d90959f9b0f6 ([Sparc] Enable anti-dependency breaker pass)
 ; SPARC64-NEXT:    ld [%fp+2043], %f1 ! 4-byte Folded Reload
 ; SPARC64-NEXT:    call __truncsfhf2
 ; SPARC64-NEXT:    fadds %f0, %f1, %f1
@@ -407,12 +431,20 @@ define void @test_fmul(ptr %p, ptr %q) nounwind {
 ; V8-OPT-LABEL: test_fmul:
 ; V8-OPT:       ! %bb.0:
 ; V8-OPT-NEXT:    save %sp, -104, %sp
+<<<<<<< HEAD
 ; V8-OPT-NEXT:    lduh [%i0], %i2
 ; V8-OPT-NEXT:    call __extendhfsf2
 ; V8-OPT-NEXT:    lduh [%i1], %o0
 ; V8-OPT-NEXT:    st %f0, [%fp+-8] ! 4-byte Folded Spill
 ; V8-OPT-NEXT:    call __extendhfsf2
 ; V8-OPT-NEXT:    mov %i2, %o0
+=======
+; V8-OPT-NEXT:    call __extendhfsf2
+; V8-OPT-NEXT:    lduh [%i0], %o0
+; V8-OPT-NEXT:    lduh [%i1], %o0
+; V8-OPT-NEXT:    call __extendhfsf2
+; V8-OPT-NEXT:    st %f0, [%fp+-8]
+>>>>>>> d90959f9b0f6 ([Sparc] Enable anti-dependency breaker pass)
 ; V8-OPT-NEXT:    ld [%fp+-8], %f1 ! 4-byte Folded Reload
 ; V8-OPT-NEXT:    fmuls %f0, %f1, %f0
 ; V8-OPT-NEXT:    st %f0, [%fp+-4]
@@ -444,12 +476,20 @@ define void @test_fmul(ptr %p, ptr %q) nounwind {
 ; V9-LABEL: test_fmul:
 ; V9:       ! %bb.0:
 ; V9-NEXT:    save %sp, -104, %sp
+<<<<<<< HEAD
 ; V9-NEXT:    lduh [%i0], %i2
 ; V9-NEXT:    call __extendhfsf2
 ; V9-NEXT:    lduh [%i1], %o0
 ; V9-NEXT:    st %f0, [%fp+-8] ! 4-byte Folded Spill
 ; V9-NEXT:    call __extendhfsf2
 ; V9-NEXT:    mov %i2, %o0
+=======
+; V9-NEXT:    call __extendhfsf2
+; V9-NEXT:    lduh [%i0], %o0
+; V9-NEXT:    lduh [%i1], %o0
+; V9-NEXT:    call __extendhfsf2
+; V9-NEXT:    st %f0, [%fp+-8]
+>>>>>>> d90959f9b0f6 ([Sparc] Enable anti-dependency breaker pass)
 ; V9-NEXT:    ld [%fp+-8], %f1 ! 4-byte Folded Reload
 ; V9-NEXT:    fmuls %f0, %f1, %f0
 ; V9-NEXT:    st %f0, [%fp+-4]
@@ -462,12 +502,20 @@ define void @test_fmul(ptr %p, ptr %q) nounwind {
 ; SPARC64-LABEL: test_fmul:
 ; SPARC64:       ! %bb.0:
 ; SPARC64-NEXT:    save %sp, -192, %sp
+<<<<<<< HEAD
 ; SPARC64-NEXT:    lduh [%i0], %i2
 ; SPARC64-NEXT:    call __extendhfsf2
 ; SPARC64-NEXT:    lduh [%i1], %o0
 ; SPARC64-NEXT:    st %f0, [%fp+2043] ! 4-byte Folded Spill
 ; SPARC64-NEXT:    call __extendhfsf2
 ; SPARC64-NEXT:    mov %i2, %o0
+=======
+; SPARC64-NEXT:    call __extendhfsf2
+; SPARC64-NEXT:    lduh [%i0], %o0
+; SPARC64-NEXT:    lduh [%i1], %o0
+; SPARC64-NEXT:    call __extendhfsf2
+; SPARC64-NEXT:    st %f0, [%fp+2043]
+>>>>>>> d90959f9b0f6 ([Sparc] Enable anti-dependency breaker pass)
 ; SPARC64-NEXT:    ld [%fp+2043], %f1 ! 4-byte Folded Reload
 ; SPARC64-NEXT:    call __truncsfhf2
 ; SPARC64-NEXT:    fmuls %f0, %f1, %f1

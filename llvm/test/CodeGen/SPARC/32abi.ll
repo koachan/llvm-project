@@ -58,17 +58,18 @@ define void @call_intarg(i32 %i0, ptr %i1) {
 ; CHECK-LABEL: floatarg:
 ; HARD: save %sp, -120, %sp
 ; HARD: mov %i5, %g2
-; HARD-NEXT: ld [%fp+92], %g3
 ; HARD-NEXT: mov %i4, %i5
 ; HARD-NEXT: ! kill
-; HARD-NEXT: std %g2, [%fp+-24]
-; HARD-NEXT: mov %i3, %i4
-; HARD-NEXT: std %i4, [%fp+-16]
-; HARD-NEXT: ! kill
-; HARD-NEXT: std %i0, [%fp+-8]
-; HARD-NEXT: st %i2, [%fp+-28]
 ; HARD-NEXT: ld [%fp+104], %f0
 ; HARD-NEXT: ldd [%fp+96], %f2
+; HARD-NEXT: ld [%fp+92], %g3
+; HARD-NEXT: mov %i3, %i4
+; HARD-NEXT: ! kill
+; HARD-NEXT: fstod %f0, %f30
+; HARD-NEXT: std %g2, [%fp+-24]
+; HARD-NEXT: std %i4, [%fp+-16]
+; HARD-NEXT: std %i0, [%fp+-8]
+; HARD-NEXT: st %i2, [%fp+-28]
 ; HARD-NEXT: ld [%fp+-28], %f1
 ; HARD-NEXT: ldd [%fp+-8], %f4
 ; HARD-NEXT: ldd [%fp+-16], %f6
@@ -78,8 +79,7 @@ define void @call_intarg(i32 %i0, ptr %i1) {
 ; HARD-NEXT: faddd %f6, %f4, %f4
 ; HARD-NEXT: faddd %f8, %f4, %f4
 ; HARD-NEXT: faddd %f2, %f4, %f2
-; HARD-NEXT: fstod %f0, %f0
-; HARD-NEXT: faddd %f0, %f2, %f0
+; HARD-NEXT: faddd %f30, %f2, %f0
 ; SOFT: save %sp, -96, %sp
 ; SOFT: ld [%fp+104], %l0
 ; SOFT-NEXT: ld [%fp+96], %l1
@@ -113,8 +113,8 @@ define void @call_intarg(i32 %i0, ptr %i1) {
 ; SOFT-NEXT:  call __adddf3
 ; SOFT-NEXT:  nop
 ; SOFT-NEXT:  mov  %o0, %i0
-; SOFT-NEXT:  mov  %o1, %i1
 ; SOFT-NEXT:  mov  %l0, %o0
+; SOFT-NEXT:  mov  %o1, %i1
 ; SOFT-NEXT:  call __extendsfdf2
 ; SOFT-NEXT:  nop
 ; SOFT-NEXT:  mov  %i0, %o2
@@ -144,15 +144,23 @@ define double @floatarg(double %a0,   ; %i0,%i1
 ; HARD: save %sp, -112, %sp
 ; HARD: mov %i2, %o1
 ; HARD-NEXT: mov %i0, %o2
+<<<<<<< HEAD
 ; HARD-NEXT: mov %i1, %o0
 ; HARD-NEXT: st %i0, [%sp+104]
 ; HARD-NEXT: std %o0, [%sp+96]
 ; HARD-NEXT: st %o1, [%sp+92]
+=======
+>>>>>>> d90959f9b0f6 ([Sparc] Enable anti-dependency breaker pass)
 ; HARD-NEXT: mov %i1, %o3
-; HARD-NEXT: mov %o1, %o4
 ; HARD-NEXT: mov %i1, %o5
+; HARD-NEXT: st %i0, [%sp+104]
+; HARD-NEXT: mov %i1, %o0
+; HARD-NEXT: mov %o1, %o4
+; HARD-NEXT: std %o0, [%sp+96]
+; HARD-NEXT: st %o1, [%sp+92]
 ; HARD-NEXT: call floatarg
 ; HARD: std %f0, [%i4]
+<<<<<<< HEAD
 ; SOFT: mov %i2, %o1
 ; SOFT-NEXT: mov %i1, %o0
 ; SOFT-NEXT: mov %i0, %o2
@@ -165,6 +173,20 @@ define double @floatarg(double %a0,   ; %i0,%i1
 ; SOFT-NEXT: mov %i1, %o5
 ; SOFT-NEXT: call floatarg
 ; SOFT: std %o0, [%i4]
+=======
+; SOFT:  mov  %i1, %o0
+; SOFT-NEXT:  mov  %i2, %o1
+; SOFT-NEXT:  mov  %i0, %o2
+; SOFT-NEXT:  mov  %i1, %o3
+; SOFT-NEXT:  mov  %i2, %o4
+; SOFT-NEXT:  mov  %i1, %o5
+; SOFT-NEXT:  st %i0, [%sp+104]
+; SOFT-NEXT:  st %i2, [%sp+100]
+; SOFT-NEXT:  st %i1, [%sp+96]
+; SOFT-NEXT:  st %i2, [%sp+92]
+; SOFT-NEXT:  call floatarg
+; SOFT:  std %o0, [%i4]
+>>>>>>> d90959f9b0f6 ([Sparc] Enable anti-dependency breaker pass)
 ; CHECK: restore
 define void @call_floatarg(float %f1, double %d2, float %f5, ptr %p) {
   %r = call double @floatarg(double %d2, float %f1, double %d2, double %d2,
@@ -178,11 +200,11 @@ define void @call_floatarg(float %f1, double %d2, float %f5, ptr %p) {
 ;; endian, since the 64-bit math needs to be split
 ; CHECK-LABEL: i64arg:
 ; CHECK:  save %sp, -96, %sp
-; CHECK-BE: ld [%fp+104], %g2
+; CHECK-BE: addcc %i1, %i2, %i1
+; CHECK-BE-NEXT: ld [%fp+92], %l0
 ; CHECK-BE-NEXT: ld [%fp+100], %g3
 ; CHECK-BE-NEXT: ld [%fp+96], %g4
-; CHECK-BE-NEXT: ld [%fp+92], %l0
-; CHECK-BE-NEXT: addcc %i1, %i2, %i1
+; CHECK-BE-NEXT: ld [%fp+104], %g2
 ; CHECK-BE-NEXT: addxcc %i0, 0, %i0
 ; CHECK-BE-NEXT: addcc %i4, %i1, %i1
 ; CHECK-BE-NEXT: addxcc %i3, %i0, %i0
@@ -193,11 +215,11 @@ define void @call_floatarg(float %f1, double %d2, float %f5, ptr %p) {
 ; CHECK-BE-NEXT: addcc %g2, %i1, %i1
 ; CHECK-BE-NEXT: addxcc %i0, 0, %i0
 ;
-; CHECK-LE: ld [%fp+104], %g2
+; CHECK-LE: addcc %i0, %i2, %i0
+; CHECK-LE-NEXT: ld [%fp+92], %l0
 ; CHECK-LE-NEXT: ld [%fp+96], %g3
 ; CHECK-LE-NEXT: ld [%fp+100], %g4
-; CHECK-LE-NEXT: ld [%fp+92], %l0
-; CHECK-LE-NEXT: addcc %i0, %i2, %i0
+; CHECK-LE-NEXT: ld [%fp+104], %g2
 ; CHECK-LE-NEXT: addxcc %i1, 0, %i1
 ; CHECK-LE-NEXT: addcc %i3, %i0, %i0
 ; CHECK-LE-NEXT: addxcc %i4, %i1, %i1
@@ -228,16 +250,28 @@ define i64 @i64arg(i64 %a0,    ; %i0,%i1
 
 ; CHECK-LABEL: call_i64arg:
 ; CHECK: save %sp, -112, %sp
+<<<<<<< HEAD
 ; CHECK: mov %i2, %o1
 ; CHECK-NEXT: mov %i1, %o0
 ; CHECK-NEXT: mov %i0, %o2
+=======
+; CHECK: mov      %i1, %o0
+; CHECK-NEXT: mov      %i2, %o1
+; CHECK-NEXT: mov      %i0, %o2
+; CHECK-NEXT: mov      %i1, %o3
+; CHECK-NEXT: mov      %i2, %o4
+; CHECK-NEXT: mov      %i1, %o5
+>>>>>>> d90959f9b0f6 ([Sparc] Enable anti-dependency breaker pass)
 ; CHECK-NEXT: st %i0, [%sp+104]
 ; CHECK-NEXT: st %i2, [%sp+100]
 ; CHECK-NEXT: st %i1, [%sp+96]
 ; CHECK-NEXT: st %i2, [%sp+92]
+<<<<<<< HEAD
 ; CHECK-NEXT: mov %i1, %o3
 ; CHECK-NEXT: mov %i2, %o4
 ; CHECK-NEXT: mov %i1, %o5
+=======
+>>>>>>> d90959f9b0f6 ([Sparc] Enable anti-dependency breaker pass)
 ; CHECK-NEXT: call i64arg
 ; CHECK: std %o0, [%i3]
 ; CHECK-NEXT: restore

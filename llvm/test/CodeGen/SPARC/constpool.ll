@@ -25,10 +25,10 @@ entry:
 
 
 ; abs64: floatCP
-; abs64: sethi %hi(.LCPI0_0), %[[R1:[gilo][0-7]]]
-; abs64: add %[[R1]], %lo(.LCPI0_0), %[[R2:[gilo][0-7]]]
 ; abs64: sethi %hh(.LCPI0_0), %[[R3:[gilo][0-7]]]
+; abs64: sethi %hi(.LCPI0_0), %[[R1:[gilo][0-7]]]
 ; abs64: add %[[R3]], %hm(.LCPI0_0), %[[R4:[gilo][0-7]]]
+; abs64: add %[[R1]], %lo(.LCPI0_0), %[[R2:[gilo][0-7]]]
 ; abs64: sllx %[[R4]], 32, %[[R5:[gilo][0-7]]]
 ; abs64: retl
 ; abs64: ld [%[[R5]]+%[[R2]]], %f0

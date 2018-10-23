@@ -133,7 +133,7 @@ entry:
 
 ; CHECK-LABEL: test_constraint_f_e_i32_i64:
 ; CHECK: ld [%i0+%lo(.LCPI13_0)], %f0
-; CHECK: ldd [%i0+%lo(.LCPI13_1)], %f2
+; CHECK: ldd [%i5+%lo(.LCPI13_1)], %f2
 ; CHECK: fadds %f0, %f0, %f0
 ; CHECK: faddd %f2, %f2, %f0
 

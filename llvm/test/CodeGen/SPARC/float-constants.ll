@@ -95,9 +95,9 @@ define double @test_intrins_call() nounwind {
 ; CHECK-NEXT:    save %sp, -96, %sp
 ; CHECK-NEXT:    sethi 1048576, %o0
 ; CHECK-NEXT:    mov %g0, %o1
-; CHECK-NEXT:    mov %o0, %o2
-; CHECK-NEXT:    call pow
 ; CHECK-NEXT:    mov %g0, %o3
+; CHECK-NEXT:    call pow
+; CHECK-NEXT:    mov %o0, %o2
 ; CHECK-NEXT:    ret
 ; CHECK-NEXT:    restore
 ;

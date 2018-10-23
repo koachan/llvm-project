@@ -640,6 +640,20 @@ unsigned SparcInstrInfo::getInstSizeInBytes(const MachineInstr &MI) const {
   return get(Opcode).getSize();
 }
 
+bool SparcInstrInfo::isSchedulingBoundary(const MachineInstr &MI,
+                                          const MachineBasicBlock *MBB,
+                                          const MachineFunction &MF) const {
+
+  if (MI.getOpcode() == SP::RESTORErr || MI.getOpcode() == SP::RESTOREri)
+    return true;
+
+  const TargetRegisterInfo *TRI = MF.getSubtarget().getRegisterInfo();
+  if (MI.modifiesRegister(SP::O7, TRI))
+    return true;
+
+  return TargetInstrInfo::isSchedulingBoundary(MI, MBB, MF);
+}
+
 bool SparcInstrInfo::expandPostRAPseudo(MachineInstr &MI) const {
   switch (MI.getOpcode()) {
   case TargetOpcode::LOAD_STACK_GUARD: {

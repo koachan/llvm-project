@@ -157,11 +157,11 @@ define i1 @setcc_resultty(i64 %a, i1 %b) nounwind {
 ; CHECK-LABEL: setcc_resultty:
 ; CHECK:       ! %bb.0:
 ; CHECK-NEXT:    save %sp, -128, %sp
-; CHECK-NEXT:    mov %g0, %i2
-; CHECK-NEXT:    sethi 4194303, %i3
-; CHECK-NEXT:    or %i3, 1023, %i3
 ; CHECK-NEXT:    sethi 131071, %i4
+; CHECK-NEXT:    sethi 4194303, %i3
+; CHECK-NEXT:    mov %g0, %i2
 ; CHECK-NEXT:    or %i4, 1023, %i4
+; CHECK-NEXT:    or %i3, 1023, %i3
 ; CHECK-NEXT:    sllx %i4, 32, %i4
 ; CHECK-NEXT:    or %i4, %i3, %i3
 ; CHECK-NEXT:    and %i0, %i3, %i3

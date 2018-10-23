@@ -108,6 +108,10 @@ public:
   /// instruction may be.  This returns the maximum number of bytes.
   unsigned getInstSizeInBytes(const MachineInstr &MI) const override;
 
+  bool isSchedulingBoundary(const MachineInstr &MI,
+                            const MachineBasicBlock *MBB,
+                            const MachineFunction &MF) const override;
+
   // Lower pseudo instructions after register allocation.
   bool expandPostRAPseudo(MachineInstr &MI) const override;
 };

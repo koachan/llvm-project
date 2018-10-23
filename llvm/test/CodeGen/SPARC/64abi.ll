@@ -106,6 +106,12 @@ define double @floatarg(float %a0,    ; %f1
 ; Store 4 bytes, right-aligned in slot.
 ; HARD: st %f1, [%sp+2307]
 ; HARD: fmovd %f2, %f4
+; SOFT: mov  %i2, %o0
+; SOFT: mov  %i1, %o1
+; SOFT: mov  %i1, %o2
+; SOFT: mov  %i1, %o3
+; SOFT: mov  %i2, %o4
+; SOFT: mov  %i2, %o5
 ; SOFT: stx %i1, [%sp+2311]
 ; SOFT: stx %i0, [%sp+2303]
 ; SOFT: stx %i2, [%sp+2295]
@@ -118,10 +124,13 @@ define double @floatarg(float %a0,    ; %f1
 ; SOFT: stx %i2, [%sp+2239]
 ; SOFT: stx %i2, [%sp+2231]
 ; SOFT: stx %i2, [%sp+2223]
+<<<<<<< HEAD
 ; SOFT: mov %i1, %o2
 ; SOFT: mov %i1, %o3
 ; SOFT: mov %i2, %o4
 ; SOFT: mov %i2, %o5
+=======
+>>>>>>> d90959f9b0f6 ([Sparc] Enable anti-dependency breaker pass)
 ; CHECK: call floatarg
 ; CHECK-NOT: add %sp
 ; CHECK: restore
@@ -171,6 +180,7 @@ define void @mixedarg(i8 %a0,      ; %i0
 }
 
 ; CHECK-LABEL: call_mixedarg:
+; SOFT: mov  %i1, %o3
 ; CHECK: stx %i2, [%sp+2247]
 ; CHECK: stx %i0, [%sp+2223]
 ; HARD: fmovd %f2, %f6
@@ -444,11 +454,11 @@ entry:
 declare i32 @use_buf(i32, ptr)
 
 ; CHECK-LABEL: test_fp128_args:
-; HARD-DAG:   std %f0, [%fp+{{.+}}]
-; HARD-DAG:   std %f2, [%fp+{{.+}}]
-; HARD-DAG:   std %f6, [%fp+{{.+}}]
-; HARD-DAG:   std %f4, [%fp+{{.+}}]
 ; HARD:       add %fp, [[Offset:[0-9]+]], %o0
+; HARD-DAG:   std %f2, [%fp+{{.+}}]
+; HARD-DAG:   std %f0, [%fp+{{.+}}]
+; HARD-DAG:   std %f4, [%fp+{{.+}}]
+; HARD-DAG:   std %f6, [%fp+{{.+}}]
 ; HARD:       call _Qp_add
 ; HARD:       ldd [%fp+[[Offset]]], %f0
 ; SOFT-DAG:       mov  %i0, %o0
@@ -487,8 +497,8 @@ entry:
 ; HARD:   fmovs %f3, %f1
 ; SOFT:   srl %i1, 0, %o0
 ; CHECK:  call cosf
-; HARD:   st %f0, [%fp+[[Offset1:[0-9]+]]]
 ; HARD:   ld [%fp+[[Offset0]]], %f1
+; HARD:   st %f0, [%fp+[[Offset1:[0-9]+]]]
 ; SOFT:   mov  %o0, %i1
 ; SOFT:   srl %i0, 0, %o0
 ; CHECK:  call sinf

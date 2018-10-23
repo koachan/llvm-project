@@ -67,6 +67,7 @@ BitVector SparcRegisterInfo::getReservedRegs(const MachineFunction &MF) const {
     Reserved.set(SP::G5);
 
   Reserved.set(SP::O6);
+  Reserved.set(SP::O7);
   Reserved.set(SP::I6);
   Reserved.set(SP::I7);
   Reserved.set(SP::G0);

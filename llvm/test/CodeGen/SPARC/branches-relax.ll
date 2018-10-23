@@ -123,9 +123,6 @@ define float @branch_relax_float(float %in) {
 ; SPARC64-NEXT:    nop
 ; SPARC64-NEXT:  .LBB2_1: ! %true
 ; SPARC64-NEXT:    sethi %h44(.LCPI2_1), %i0
-; SPARC64-NEXT:    add %i0, %m44(.LCPI2_1), %i0
-; SPARC64-NEXT:    sllx %i0, 12, %i0
-; SPARC64-NEXT:    ld [%i0+%l44(.LCPI2_1)], %f0
 ; SPARC64-NEXT:    !APP
 ; SPARC64-NEXT:    nop
 ; SPARC64-NEXT:    nop
@@ -136,6 +133,9 @@ define float @branch_relax_float(float %in) {
 ; SPARC64-NEXT:    nop
 ; SPARC64-NEXT:    nop
 ; SPARC64-NEXT:    !NO_APP
+; SPARC64-NEXT:    add %i0, %m44(.LCPI2_1), %i0
+; SPARC64-NEXT:    sllx %i0, 12, %i0
+; SPARC64-NEXT:    ld [%i0+%l44(.LCPI2_1)], %f0
 ; SPARC64-NEXT:    ret
 ; SPARC64-NEXT:    restore
 ; SPARC64-NEXT:  .LBB2_2: ! %false

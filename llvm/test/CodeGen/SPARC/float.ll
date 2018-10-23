@@ -144,16 +144,16 @@ entry:
 }
 
 ; V8-LABEL:    test_itod_dtoi
-; V8:          fitod
 ; V8:          fdtoi
+; V8:          fitod
 
 ; V9-LABEL:    test_itod_dtoi
-; V9:          fitod
 ; V9:          fdtoi
+; V9:          fitod
 
 ; SPARC64-LABEL:    test_itod_dtoi
-; SPARC64:          fitod
 ; SPARC64:          fdtoi
+; SPARC64:          fitod
 
 define void @test_itod_dtoi(i32 %a, double %b, ptr %ptr0, ptr %ptr1) {
 entry:

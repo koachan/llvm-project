@@ -40,9 +40,9 @@ define i32 @test_addx(i64 %a, i64 %b, i64 %c) nounwind {
 ;
 ; V9-LABEL: test_addx:
 ; V9:       ! %bb.0: ! %entry
+; V9-NEXT:    addcc %o1, %o3, %o1
 ; V9-NEXT:    mov %g0, %g2
 ; V9-NEXT:    mov %g0, %g3
-; V9-NEXT:    addcc %o1, %o3, %o1
 ; V9-NEXT:    addxcc %o0, %o2, %o0
 ; V9-NEXT:    cmp %o0, %o4
 ; V9-NEXT:    movgu %icc, 1, %g2
@@ -55,8 +55,8 @@ define i32 @test_addx(i64 %a, i64 %b, i64 %c) nounwind {
 ;
 ; SPARC64-LABEL: test_addx:
 ; SPARC64:       ! %bb.0: ! %entry
-; SPARC64-NEXT:    mov %g0, %o3
 ; SPARC64-NEXT:    add %o0, %o1, %o0
+; SPARC64-NEXT:    mov %g0, %o3
 ; SPARC64-NEXT:    cmp %o0, %o2
 ; SPARC64-NEXT:    movgu %xcc, 1, %o3
 ; SPARC64-NEXT:    retl
@@ -119,8 +119,8 @@ define float @test_select_fp_icc(i32 %a, float %f1, float %f2) nounwind {
 ; V8-LABEL: test_select_fp_icc:
 ; V8:       ! %bb.0: ! %entry
 ; V8-NEXT:    add %sp, -104, %sp
-; V8-NEXT:    st %o2, [%sp+100]
 ; V8-NEXT:    cmp %o0, 0
+; V8-NEXT:    st %o2, [%sp+100]
 ; V8-NEXT:    be .LBB2_2
 ; V8-NEXT:    st %o1, [%sp+96]
 ; V8-NEXT:  ! %bb.1: ! %entry
@@ -137,9 +137,9 @@ define float @test_select_fp_icc(i32 %a, float %f1, float %f2) nounwind {
 ; V9-NEXT:    add %sp, -104, %sp
 ; V9-NEXT:    st %o2, [%sp+100]
 ; V9-NEXT:    st %o1, [%sp+96]
+; V9-NEXT:    cmp %o0, 0
 ; V9-NEXT:    ld [%sp+100], %f0
 ; V9-NEXT:    ld [%sp+96], %f1
-; V9-NEXT:    cmp %o0, 0
 ; V9-NEXT:    fmovse %icc, %f1, %f0
 ; V9-NEXT:    retl
 ; V9-NEXT:    add %sp, 104, %sp
@@ -169,10 +169,10 @@ define double @test_select_dfp_icc(i32 %a, double %f1, double %f2) nounwind {
 ; V8-NEXT:    add %sp, -112, %sp
 ; V8-NEXT:    mov %o4, %o5
 ; V8-NEXT:    mov %o2, %g3
-; V8-NEXT:    mov %o3, %o4
-; V8-NEXT:    std %o4, [%sp+96]
 ; V8-NEXT:    cmp %o0, 0
+; V8-NEXT:    mov %o3, %o4
 ; V8-NEXT:    mov %o1, %g2
+; V8-NEXT:    std %o4, [%sp+96]
 ; V8-NEXT:    be .LBB3_2
 ; V8-NEXT:    std %g2, [%sp+104]
 ; V8-NEXT:  ! %bb.1: ! %entry
@@ -189,13 +189,13 @@ define double @test_select_dfp_icc(i32 %a, double %f1, double %f2) nounwind {
 ; V9-NEXT:    add %sp, -112, %sp
 ; V9-NEXT:    mov %o4, %o5
 ; V9-NEXT:    mov %o2, %g3
+; V9-NEXT:    cmp %o0, 0
 ; V9-NEXT:    mov %o3, %o4
-; V9-NEXT:    std %o4, [%sp+96]
 ; V9-NEXT:    mov %o1, %g2
+; V9-NEXT:    std %o4, [%sp+96]
 ; V9-NEXT:    std %g2, [%sp+104]
 ; V9-NEXT:    ldd [%sp+96], %f0
 ; V9-NEXT:    ldd [%sp+104], %f2
-; V9-NEXT:    cmp %o0, 0
 ; V9-NEXT:    fmovde %icc, %f2, %f0
 ; V9-NEXT:    retl
 ; V9-NEXT:    add %sp, 112, %sp
@@ -224,13 +224,14 @@ define i32 @test_select_int_fcc(float %f, i32 %a, i32 %b) nounwind {
 ; V8:       ! %bb.0: ! %entry
 ; V8-NEXT:    add %sp, -96, %sp
 ; V8-NEXT:    st %o0, [%sp+92]
-; V8-NEXT:    ld [%sp+92], %f0
 ; V8-NEXT:    sethi %hi(.LCPI4_0), %o0
 ; V8-NEXT:    ld [%o0+%lo(.LCPI4_0)], %f1
+; V8-NEXT:    ld [%sp+92], %f0
+; V8-NEXT:    mov %o1, %o0
 ; V8-NEXT:    fcmps %f0, %f1
 ; V8-NEXT:    nop
 ; V8-NEXT:    fbne .LBB4_2
-; V8-NEXT:    mov %o1, %o0
+; V8-NEXT:    nop
 ; V8-NEXT:  ! %bb.1: ! %entry
 ; V8-NEXT:    mov %o2, %o0
 ; V8-NEXT:  .LBB4_2: ! %entry
@@ -241,10 +242,10 @@ define i32 @test_select_int_fcc(float %f, i32 %a, i32 %b) nounwind {
 ; V9:       ! %bb.0: ! %entry
 ; V9-NEXT:    add %sp, -96, %sp
 ; V9-NEXT:    st %o0, [%sp+92]
-; V9-NEXT:    ld [%sp+92], %f0
-; V9-NEXT:    sethi %hi(.LCPI4_0), %o0
-; V9-NEXT:    ld [%o0+%lo(.LCPI4_0)], %f1
+; V9-NEXT:    sethi %hi(.LCPI4_0), %o5
 ; V9-NEXT:    mov %o2, %o0
+; V9-NEXT:    ld [%sp+92], %f0
+; V9-NEXT:    ld [%o5+%lo(.LCPI4_0)], %f1
 ; V9-NEXT:    fcmps %fcc0, %f0, %f1
 ; V9-NEXT:    movne %fcc0, %o1, %o0
 ; V9-NEXT:    retl
@@ -284,9 +285,9 @@ define float @test_select_fp_fcc(float %f, float %f1, float %f2) nounwind {
 ; V8-NEXT:    st %o0, [%sp+92]
 ; V8-NEXT:    st %o2, [%sp+100]
 ; V8-NEXT:    st %o1, [%sp+96]
+; V8-NEXT:    sethi %hi(.LCPI5_0), %o5
 ; V8-NEXT:    ld [%sp+92], %f0
-; V8-NEXT:    sethi %hi(.LCPI5_0), %o0
-; V8-NEXT:    ld [%o0+%lo(.LCPI5_0)], %f1
+; V8-NEXT:    ld [%o5+%lo(.LCPI5_0)], %f1
 ; V8-NEXT:    fcmps %f0, %f1
 ; V8-NEXT:    nop
 ; V8-NEXT:    fbne .LBB5_2
@@ -306,10 +307,10 @@ define float @test_select_fp_fcc(float %f, float %f1, float %f2) nounwind {
 ; V9-NEXT:    st %o0, [%sp+92]
 ; V9-NEXT:    st %o2, [%sp+100]
 ; V9-NEXT:    st %o1, [%sp+96]
+; V9-NEXT:    sethi %hi(.LCPI5_0), %o5
 ; V9-NEXT:    ld [%sp+92], %f1
+; V9-NEXT:    ld [%o5+%lo(.LCPI5_0)], %f2
 ; V9-NEXT:    ld [%sp+100], %f0
-; V9-NEXT:    sethi %hi(.LCPI5_0), %o0
-; V9-NEXT:    ld [%o0+%lo(.LCPI5_0)], %f2
 ; V9-NEXT:    ld [%sp+96], %f3
 ; V9-NEXT:    fcmps %fcc0, %f1, %f2
 ; V9-NEXT:    fmovsne %fcc0, %f3, %f0
@@ -319,10 +320,10 @@ define float @test_select_fp_fcc(float %f, float %f1, float %f2) nounwind {
 ; SPARC64-LABEL: test_select_fp_fcc:
 ; SPARC64:       ! %bb.0: ! %entry
 ; SPARC64-NEXT:    sethi %h44(.LCPI5_0), %o0
+; SPARC64-NEXT:    fmovs %f5, %f0
 ; SPARC64-NEXT:    add %o0, %m44(.LCPI5_0), %o0
 ; SPARC64-NEXT:    sllx %o0, 12, %o0
 ; SPARC64-NEXT:    ld [%o0+%l44(.LCPI5_0)], %f2
-; SPARC64-NEXT:    fmovs %f5, %f0
 ; SPARC64-NEXT:    fcmps %fcc0, %f1, %f2
 ; SPARC64-NEXT:    retl
 ; SPARC64-NEXT:    fmovsne %fcc0, %f3, %f0
@@ -347,18 +348,18 @@ define double @test_select_dfp_fcc(double %f, double %f1, double %f2) nounwind {
 ; V8-LABEL: test_select_dfp_fcc:
 ; V8:       ! %bb.0: ! %entry
 ; V8-NEXT:    add %sp, -120, %sp
-; V8-NEXT:    ! kill: def $o1 killed $o1 killed $o0_o1 def $o0_o1
 ; V8-NEXT:    ! kill: def $o5 killed $o5 killed $o4_o5 def $o4_o5
+; V8-NEXT:    ! kill: def $o1 killed $o1 killed $o0_o1 def $o0_o1
 ; V8-NEXT:    ! kill: def $o3 killed $o3 killed $o2_o3 def $o2_o3
+; V8-NEXT:    ! kill: def $o4 killed $o4 killed $o4_o5 def $o4_o5
 ; V8-NEXT:    ! kill: def $o0 killed $o0 killed $o0_o1 def $o0_o1
 ; V8-NEXT:    std %o0, [%sp+112]
-; V8-NEXT:    ! kill: def $o4 killed $o4 killed $o4_o5 def $o4_o5
 ; V8-NEXT:    std %o4, [%sp+96]
 ; V8-NEXT:    ! kill: def $o2 killed $o2 killed $o2_o3 def $o2_o3
 ; V8-NEXT:    std %o2, [%sp+104]
+; V8-NEXT:    sethi %hi(.LCPI6_0), %o5
 ; V8-NEXT:    ldd [%sp+112], %f0
-; V8-NEXT:    sethi %hi(.LCPI6_0), %o0
-; V8-NEXT:    ldd [%o0+%lo(.LCPI6_0)], %f2
+; V8-NEXT:    ldd [%o5+%lo(.LCPI6_0)], %f2
 ; V8-NEXT:    fcmpd %f0, %f2
 ; V8-NEXT:    nop
 ; V8-NEXT:    fbne .LBB6_2
@@ -375,20 +376,20 @@ define double @test_select_dfp_fcc(double %f, double %f1, double %f2) nounwind {
 ; V9-LABEL: test_select_dfp_fcc:
 ; V9:       ! %bb.0: ! %entry
 ; V9-NEXT:    add %sp, -120, %sp
-; V9-NEXT:    ! kill: def $o1 killed $o1 killed $o0_o1 def $o0_o1
 ; V9-NEXT:    ! kill: def $o5 killed $o5 killed $o4_o5 def $o4_o5
+; V9-NEXT:    ! kill: def $o1 killed $o1 killed $o0_o1 def $o0_o1
 ; V9-NEXT:    ! kill: def $o3 killed $o3 killed $o2_o3 def $o2_o3
+; V9-NEXT:    ! kill: def $o4 killed $o4 killed $o4_o5 def $o4_o5
 ; V9-NEXT:    ! kill: def $o0 killed $o0 killed $o0_o1 def $o0_o1
 ; V9-NEXT:    std %o0, [%sp+112]
-; V9-NEXT:    ! kill: def $o4 killed $o4 killed $o4_o5 def $o4_o5
 ; V9-NEXT:    std %o4, [%sp+96]
 ; V9-NEXT:    ! kill: def $o2 killed $o2 killed $o2_o3 def $o2_o3
 ; V9-NEXT:    std %o2, [%sp+104]
+; V9-NEXT:    sethi %hi(.LCPI6_0), %o5
 ; V9-NEXT:    ldd [%sp+112], %f2
 ; V9-NEXT:    ldd [%sp+96], %f0
-; V9-NEXT:    sethi %hi(.LCPI6_0), %o0
-; V9-NEXT:    ldd [%o0+%lo(.LCPI6_0)], %f4
 ; V9-NEXT:    ldd [%sp+104], %f6
+; V9-NEXT:    ldd [%o5+%lo(.LCPI6_0)], %f4
 ; V9-NEXT:    fcmpd %fcc0, %f2, %f4
 ; V9-NEXT:    fmovdne %fcc0, %f6, %f0
 ; V9-NEXT:    retl
@@ -433,9 +434,9 @@ define i32 @test_float_cc(double %a, double %b, i32 %c, i32 %d) nounwind {
 ; V8-NEXT:    std %o2, [%sp+96]
 ; V8-NEXT:    ! kill: def $o0 killed $o0 killed $o0_o1 def $o0_o1
 ; V8-NEXT:    std %o0, [%sp+104]
+; V8-NEXT:    sethi %hi(.LCPI7_0), %o3
 ; V8-NEXT:    ldd [%sp+104], %f2
-; V8-NEXT:    sethi %hi(.LCPI7_0), %o0
-; V8-NEXT:    ldd [%o0+%lo(.LCPI7_0)], %f0
+; V8-NEXT:    ldd [%o3+%lo(.LCPI7_0)], %f0
 ; V8-NEXT:    fcmpd %f2, %f0
 ; V8-NEXT:    nop
 ; V8-NEXT:    fbuge .LBB7_3
@@ -469,9 +470,9 @@ define i32 @test_float_cc(double %a, double %b, i32 %c, i32 %d) nounwind {
 ; V9-NEXT:    std %o2, [%sp+96]
 ; V9-NEXT:    ! kill: def $o0 killed $o0 killed $o0_o1 def $o0_o1
 ; V9-NEXT:    std %o0, [%sp+104]
+; V9-NEXT:    sethi %hi(.LCPI7_0), %o3
 ; V9-NEXT:    ldd [%sp+104], %f2
-; V9-NEXT:    sethi %hi(.LCPI7_0), %o0
-; V9-NEXT:    ldd [%o0+%lo(.LCPI7_0)], %f0
+; V9-NEXT:    ldd [%o3+%lo(.LCPI7_0)], %f0
 ; V9-NEXT:    fcmpd %fcc0, %f2, %f0
 ; V9-NEXT:    fbuge %fcc0, .LBB7_3
 ; V9-NEXT:    nop
@@ -573,18 +574,18 @@ define void @test_adde_sube(ptr %a, ptr %b, ptr %sum, ptr %diff) nounwind {
 ; V8-NEXT:    addcc %i5, %l1, %l5
 ; V8-NEXT:    addxcc %i4, %l0, %l4
 ; V8-NEXT:    addxcc %g3, %l3, %l1
-; V8-NEXT:    addxcc %g2, %l2, %l0
 ; V8-NEXT:    std %l4, [%i2+8]
+; V8-NEXT:    addxcc %g2, %l2, %l0
 ; V8-NEXT:    std %l0, [%i2]
 ; V8-NEXT:    !APP
 ; V8-NEXT:    !NO_APP
-; V8-NEXT:    ldd [%i0+8], %l0
+; V8-NEXT:    ldd [%i0+8], %o4
 ; V8-NEXT:    ldd [%i0], %i0
-; V8-NEXT:    subcc %i5, %l1, %l3
-; V8-NEXT:    subxcc %i4, %l0, %l2
+; V8-NEXT:    subcc %i5, %o5, %l3
+; V8-NEXT:    subxcc %i4, %o4, %l2
 ; V8-NEXT:    subxcc %g3, %i1, %i5
-; V8-NEXT:    subxcc %g2, %i0, %i4
 ; V8-NEXT:    std %l2, [%i3+8]
+; V8-NEXT:    subxcc %g2, %i0, %i4
 ; V8-NEXT:    std %i4, [%i3]
 ; V8-NEXT:    ret
 ; V8-NEXT:    restore
@@ -599,18 +600,18 @@ define void @test_adde_sube(ptr %a, ptr %b, ptr %sum, ptr %diff) nounwind {
 ; V9-NEXT:    addcc %i5, %l1, %l5
 ; V9-NEXT:    addxcc %i4, %l0, %l4
 ; V9-NEXT:    addxcc %g3, %l3, %l1
-; V9-NEXT:    addxcc %g2, %l2, %l0
 ; V9-NEXT:    std %l4, [%i2+8]
+; V9-NEXT:    addxcc %g2, %l2, %l0
 ; V9-NEXT:    std %l0, [%i2]
 ; V9-NEXT:    !APP
 ; V9-NEXT:    !NO_APP
-; V9-NEXT:    ldd [%i0+8], %l0
+; V9-NEXT:    ldd [%i0+8], %o4
 ; V9-NEXT:    ldd [%i0], %i0
-; V9-NEXT:    subcc %i5, %l1, %l3
-; V9-NEXT:    subxcc %i4, %l0, %l2
+; V9-NEXT:    subcc %i5, %o5, %l3
+; V9-NEXT:    subxcc %i4, %o4, %l2
 ; V9-NEXT:    subxcc %g3, %i1, %i5
-; V9-NEXT:    subxcc %g2, %i0, %i4
 ; V9-NEXT:    std %l2, [%i3+8]
+; V9-NEXT:    subxcc %g2, %i0, %i4
 ; V9-NEXT:    std %i4, [%i3]
 ; V9-NEXT:    ret
 ; V9-NEXT:    restore
@@ -620,31 +621,31 @@ define void @test_adde_sube(ptr %a, ptr %b, ptr %sum, ptr %diff) nounwind {
 ; SPARC64-NEXT:    .register %g3, #scratch
 ; SPARC64-NEXT:  ! %bb.0: ! %entry
 ; SPARC64-NEXT:    save %sp, -128, %sp
-; SPARC64-NEXT:    ldx [%i0+8], %i4
-; SPARC64-NEXT:    ldx [%i0], %i5
 ; SPARC64-NEXT:    ldx [%i1], %g2
+; SPARC64-NEXT:    ldx [%i0+8], %i4
 ; SPARC64-NEXT:    ldx [%i1+8], %i1
+; SPARC64-NEXT:    ldx [%i0], %i5
 ; SPARC64-NEXT:    mov %g0, %g3
-; SPARC64-NEXT:    add %i5, %g2, %g2
 ; SPARC64-NEXT:    add %i4, %i1, %i1
+; SPARC64-NEXT:    add %i5, %g2, %g2
 ; SPARC64-NEXT:    cmp %i1, %i4
+; SPARC64-NEXT:    stx %i1, [%i2+8]
 ; SPARC64-NEXT:    movcs %xcc, 1, %g3
 ; SPARC64-NEXT:    srl %g3, 0, %g3
 ; SPARC64-NEXT:    add %g2, %g3, %g2
-; SPARC64-NEXT:    stx %i1, [%i2+8]
 ; SPARC64-NEXT:    stx %g2, [%i2]
 ; SPARC64-NEXT:    !APP
 ; SPARC64-NEXT:    !NO_APP
-; SPARC64-NEXT:    ldx [%i0+8], %i1
 ; SPARC64-NEXT:    mov %g0, %i2
+; SPARC64-NEXT:    ldx [%i0+8], %i1
 ; SPARC64-NEXT:    ldx [%i0], %i0
 ; SPARC64-NEXT:    cmp %i4, %i1
-; SPARC64-NEXT:    movcs %xcc, 1, %i2
-; SPARC64-NEXT:    srl %i2, 0, %i2
 ; SPARC64-NEXT:    sub %i5, %i0, %i0
-; SPARC64-NEXT:    sub %i0, %i2, %i0
 ; SPARC64-NEXT:    sub %i4, %i1, %i1
+; SPARC64-NEXT:    movcs %xcc, 1, %i2
 ; SPARC64-NEXT:    stx %i1, [%i3+8]
+; SPARC64-NEXT:    srl %i2, 0, %i2
+; SPARC64-NEXT:    sub %i0, %i2, %i0
 ; SPARC64-NEXT:    stx %i0, [%i3]
 ; SPARC64-NEXT:    ret
 ; SPARC64-NEXT:    restore

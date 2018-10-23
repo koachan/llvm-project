@@ -203,12 +203,12 @@ define <4 x float> @fmuladd_contract_v4f32(<4 x float> %a, <4 x float> %b, <4 x 
 ; SOFT-FLOAT-64-NEXT:    .cfi_def_cfa_register %fp
 ; SOFT-FLOAT-64-NEXT:    .cfi_window_save
 ; SOFT-FLOAT-64-NEXT:    .cfi_register %o7, %i7
+; SOFT-FLOAT-64-NEXT:    ld [%fp+2235], %o1
 ; SOFT-FLOAT-64-NEXT:    ld [%fp+2267], %l0
 ; SOFT-FLOAT-64-NEXT:    ld [%fp+2259], %l1
 ; SOFT-FLOAT-64-NEXT:    ld [%fp+2251], %l2
 ; SOFT-FLOAT-64-NEXT:    ld [%fp+2243], %l3
 ; SOFT-FLOAT-64-NEXT:    ld [%fp+2227], %l4
-; SOFT-FLOAT-64-NEXT:    ld [%fp+2235], %o1
 ; SOFT-FLOAT-64-NEXT:    call __mulsf3
 ; SOFT-FLOAT-64-NEXT:    srl %i3, 0, %o0
 ; SOFT-FLOAT-64-NEXT:    mov %o0, %i3
@@ -252,33 +252,33 @@ define <4 x double> @fmuladd_contract_v4f64(<4 x double> %a, <4 x double> %b, <4
 ; SOFT-FLOAT-32-NEXT:    .cfi_def_cfa_register %fp
 ; SOFT-FLOAT-32-NEXT:    .cfi_window_save
 ; SOFT-FLOAT-32-NEXT:    .cfi_register %o7, %i7
-; SOFT-FLOAT-32-NEXT:    ld [%fp+64], %l6
+; SOFT-FLOAT-32-NEXT:    ld [%fp+152], %o2
+; SOFT-FLOAT-32-NEXT:    ld [%fp+140], %o3
+; SOFT-FLOAT-32-NEXT:    ld [%fp+160], %l5
+; SOFT-FLOAT-32-NEXT:    ld [%fp+148], %l7
 ; SOFT-FLOAT-32-NEXT:    ld [%fp+156], %g2
-; SOFT-FLOAT-32-NEXT:    st %g2, [%fp+-4] ! 4-byte Folded Spill
-; SOFT-FLOAT-32-NEXT:    ld [%fp+160], %g2
-; SOFT-FLOAT-32-NEXT:    st %g2, [%fp+-8] ! 4-byte Folded Spill
-; SOFT-FLOAT-32-NEXT:    ld [%fp+148], %g2
-; SOFT-FLOAT-32-NEXT:    st %g2, [%fp+-12] ! 4-byte Folded Spill
-; SOFT-FLOAT-32-NEXT:    ld [%fp+152], %g2
-; SOFT-FLOAT-32-NEXT:    st %g2, [%fp+-16] ! 4-byte Folded Spill
-; SOFT-FLOAT-32-NEXT:    ld [%fp+140], %g2
-; SOFT-FLOAT-32-NEXT:    st %g2, [%fp+-20] ! 4-byte Folded Spill
-; SOFT-FLOAT-32-NEXT:    ld [%fp+144], %g2
-; SOFT-FLOAT-32-NEXT:    st %g2, [%fp+-24] ! 4-byte Folded Spill
-; SOFT-FLOAT-32-NEXT:    ld [%fp+132], %g2
-; SOFT-FLOAT-32-NEXT:    st %g2, [%fp+-28] ! 4-byte Folded Spill
-; SOFT-FLOAT-32-NEXT:    ld [%fp+136], %l7
+; SOFT-FLOAT-32-NEXT:    ld [%fp+144], %o4
+; SOFT-FLOAT-32-NEXT:    ld [%fp+132], %o5
+; SOFT-FLOAT-32-NEXT:    ld [%fp+92], %o0
+; SOFT-FLOAT-32-NEXT:    ld [%fp+96], %o1
+; SOFT-FLOAT-32-NEXT:    ld [%fp+64], %l6
 ; SOFT-FLOAT-32-NEXT:    ld [%fp+100], %l0
 ; SOFT-FLOAT-32-NEXT:    ld [%fp+104], %l1
 ; SOFT-FLOAT-32-NEXT:    ld [%fp+108], %l2
 ; SOFT-FLOAT-32-NEXT:    ld [%fp+112], %l3
 ; SOFT-FLOAT-32-NEXT:    ld [%fp+116], %l4
-; SOFT-FLOAT-32-NEXT:    ld [%fp+120], %l5
-; SOFT-FLOAT-32-NEXT:    ld [%fp+92], %o0
-; SOFT-FLOAT-32-NEXT:    ld [%fp+96], %o1
+; SOFT-FLOAT-32-NEXT:    st %o2, [%fp+-16] ! 4-byte Folded Spill
+; SOFT-FLOAT-32-NEXT:    st %o3, [%fp+-20] ! 4-byte Folded Spill
 ; SOFT-FLOAT-32-NEXT:    ld [%fp+124], %o2
-; SOFT-FLOAT-32-NEXT:    call __muldf3
 ; SOFT-FLOAT-32-NEXT:    ld [%fp+128], %o3
+; SOFT-FLOAT-32-NEXT:    st %l5, [%fp+-8] ! 4-byte Folded Spill
+; SOFT-FLOAT-32-NEXT:    st %l7, [%fp+-12] ! 4-byte Folded Spill
+; SOFT-FLOAT-32-NEXT:    ld [%fp+136], %l7
+; SOFT-FLOAT-32-NEXT:    ld [%fp+120], %l5
+; SOFT-FLOAT-32-NEXT:    st %g2, [%fp+-4] ! 4-byte Folded Spill
+; SOFT-FLOAT-32-NEXT:    st %o4, [%fp+-24] ! 4-byte Folded Spill
+; SOFT-FLOAT-32-NEXT:    call __muldf3
+; SOFT-FLOAT-32-NEXT:    st %o5, [%fp+-28]
 ; SOFT-FLOAT-32-NEXT:    st %o0, [%fp+-32] ! 4-byte Folded Spill
 ; SOFT-FLOAT-32-NEXT:    st %o1, [%fp+-36] ! 4-byte Folded Spill
 ; SOFT-FLOAT-32-NEXT:    mov %i4, %o0
@@ -303,27 +303,27 @@ define <4 x double> @fmuladd_contract_v4f64(<4 x double> %a, <4 x double> %b, <4
 ; SOFT-FLOAT-32-NEXT:    ld [%fp+-28], %o2 ! 4-byte Folded Reload
 ; SOFT-FLOAT-32-NEXT:    call __adddf3
 ; SOFT-FLOAT-32-NEXT:    mov %l7, %o3
-; SOFT-FLOAT-32-NEXT:    mov %o0, %i2
-; SOFT-FLOAT-32-NEXT:    mov %o1, %i3
-; SOFT-FLOAT-32-NEXT:    mov %i4, %o0
-; SOFT-FLOAT-32-NEXT:    mov %i5, %o1
 ; SOFT-FLOAT-32-NEXT:    ld [%fp+-20], %o2 ! 4-byte Folded Reload
+; SOFT-FLOAT-32-NEXT:    ld [%fp+-24], %o3 ! 4-byte Folded Reload
+; SOFT-FLOAT-32-NEXT:    mov %o0, %i2
+; SOFT-FLOAT-32-NEXT:    mov %i4, %o0
+; SOFT-FLOAT-32-NEXT:    mov %o1, %i3
 ; SOFT-FLOAT-32-NEXT:    call __adddf3
-; SOFT-FLOAT-32-NEXT:    ld [%fp+-24], %o3
-; SOFT-FLOAT-32-NEXT:    mov %o0, %i4
-; SOFT-FLOAT-32-NEXT:    mov %o1, %i5
-; SOFT-FLOAT-32-NEXT:    mov %l4, %o0
-; SOFT-FLOAT-32-NEXT:    mov %l5, %o1
+; SOFT-FLOAT-32-NEXT:    mov %i5, %o1
 ; SOFT-FLOAT-32-NEXT:    ld [%fp+-12], %o2 ! 4-byte Folded Reload
+; SOFT-FLOAT-32-NEXT:    ld [%fp+-16], %o3 ! 4-byte Folded Reload
+; SOFT-FLOAT-32-NEXT:    mov %o0, %i4
+; SOFT-FLOAT-32-NEXT:    mov %l4, %o0
+; SOFT-FLOAT-32-NEXT:    mov %o1, %i5
 ; SOFT-FLOAT-32-NEXT:    call __adddf3
-; SOFT-FLOAT-32-NEXT:    ld [%fp+-16], %o3
+; SOFT-FLOAT-32-NEXT:    mov %l5, %o1
 ; SOFT-FLOAT-32-NEXT:    mov %o0, %i0
-; SOFT-FLOAT-32-NEXT:    mov %o1, %i1
 ; SOFT-FLOAT-32-NEXT:    ld [%fp+-32], %o0 ! 4-byte Folded Reload
-; SOFT-FLOAT-32-NEXT:    ld [%fp+-36], %o1 ! 4-byte Folded Reload
 ; SOFT-FLOAT-32-NEXT:    ld [%fp+-4], %o2 ! 4-byte Folded Reload
+; SOFT-FLOAT-32-NEXT:    ld [%fp+-8], %o3 ! 4-byte Folded Reload
+; SOFT-FLOAT-32-NEXT:    mov %o1, %i1
 ; SOFT-FLOAT-32-NEXT:    call __adddf3
-; SOFT-FLOAT-32-NEXT:    ld [%fp+-8], %o3
+; SOFT-FLOAT-32-NEXT:    ld [%fp+-36], %o1
 ; SOFT-FLOAT-32-NEXT:    ! kill: def $o0 killed $o0 killed $o0_o1 def $o0_o1
 ; SOFT-FLOAT-32-NEXT:    ! kill: def $o1 killed $o1 killed $o0_o1 def $o0_o1
 ; SOFT-FLOAT-32-NEXT:    std %o0, [%l6+24]
@@ -340,12 +340,12 @@ define <4 x double> @fmuladd_contract_v4f64(<4 x double> %a, <4 x double> %b, <4
 ; SOFT-FLOAT-64-NEXT:    .cfi_def_cfa_register %fp
 ; SOFT-FLOAT-64-NEXT:    .cfi_window_save
 ; SOFT-FLOAT-64-NEXT:    .cfi_register %o7, %i7
+; SOFT-FLOAT-64-NEXT:    ldx [%fp+2231], %o1
 ; SOFT-FLOAT-64-NEXT:    ldx [%fp+2263], %l0
 ; SOFT-FLOAT-64-NEXT:    ldx [%fp+2255], %l1
 ; SOFT-FLOAT-64-NEXT:    ldx [%fp+2247], %l2
 ; SOFT-FLOAT-64-NEXT:    ldx [%fp+2239], %l3
 ; SOFT-FLOAT-64-NEXT:    ldx [%fp+2223], %l4
-; SOFT-FLOAT-64-NEXT:    ldx [%fp+2231], %o1
 ; SOFT-FLOAT-64-NEXT:    call __muldf3
 ; SOFT-FLOAT-64-NEXT:    mov %i3, %o0
 ; SOFT-FLOAT-64-NEXT:    mov %o0, %i3

@@ -24,12 +24,12 @@ define void @variable_alloca_with_overalignment(i32 %num) nounwind {
 ; CHECK64-NEXT:    add %sp, 2159, %i1
 ; CHECK64-NEXT:    and %i1, -64, %o0
 ; CHECK64-NEXT:    add %o0, -2175, %sp
-; CHECK64-NEXT:    srl %i0, 0, %i0
-; CHECK64-NEXT:    add %i0, 15, %i0
-; CHECK64-NEXT:    sethi 4194303, %i1
-; CHECK64-NEXT:    or %i1, 1008, %i1
 ; CHECK64-NEXT:    sethi 0, %i2
+; CHECK64-NEXT:    sethi 4194303, %i1
+; CHECK64-NEXT:    srl %i0, 0, %i0
 ; CHECK64-NEXT:    or %i2, 1, %i2
+; CHECK64-NEXT:    or %i1, 1008, %i1
+; CHECK64-NEXT:    add %i0, 15, %i0
 ; CHECK64-NEXT:    sllx %i2, 32, %i2
 ; CHECK64-NEXT:    or %i2, %i1, %i1
 ; CHECK64-NEXT:    and %i0, %i1, %i0
@@ -66,12 +66,12 @@ define void @variable_alloca_with_overalignment_2(i32 %num) nounwind {
 ; CHECK64-LABEL: variable_alloca_with_overalignment_2:
 ; CHECK64:       ! %bb.0:
 ; CHECK64-NEXT:    save %sp, -128, %sp
-; CHECK64-NEXT:    srl %i0, 0, %i0
-; CHECK64-NEXT:    add %i0, 15, %i0
-; CHECK64-NEXT:    sethi 4194303, %i1
-; CHECK64-NEXT:    or %i1, 1008, %i1
 ; CHECK64-NEXT:    sethi 0, %i2
+; CHECK64-NEXT:    sethi 4194303, %i1
+; CHECK64-NEXT:    srl %i0, 0, %i0
 ; CHECK64-NEXT:    or %i2, 1, %i2
+; CHECK64-NEXT:    or %i1, 1008, %i1
+; CHECK64-NEXT:    add %i0, 15, %i0
 ; CHECK64-NEXT:    sllx %i2, 32, %i2
 ; CHECK64-NEXT:    or %i2, %i1, %i1
 ; CHECK64-NEXT:    and %i0, %i1, %i0

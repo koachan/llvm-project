@@ -27,10 +27,10 @@ define zeroext i8 @loadG() {
 
 
 ; abs64: loadG
-; abs64: sethi %hi(G), %[[R1:[gilo][0-7]]]
-; abs64: add %[[R1]], %lo(G), %[[R2:[gilo][0-7]]]
 ; abs64: sethi %hh(G), %[[R3:[gilo][0-7]]]
+; abs64: sethi %hi(G), %[[R1:[gilo][0-7]]]
 ; abs64: add %[[R3]], %hm(G), %[[R4:[gilo][0-7]]]
+; abs64: add %[[R1]], %lo(G), %[[R2:[gilo][0-7]]]
 ; abs64: sllx %[[R4]], 32, %[[R5:[gilo][0-7]]]
 ; abs64: retl
 ; abs64: ldub [%[[R5]]+%[[R2]]], %o0

@@ -30,10 +30,10 @@ entry:
 ; abs44: jmp %o0
 
 ; abs64-LABEL: func_block_addr:
-; abs64: sethi %hi([[BLK:.+]]), [[R:%[gilo][0-7]]]
-; abs64: add [[R]], %lo([[BLK]]), [[R1:%[gilo][0-7]]]
-; abs64: sethi %hh([[BLK]]), [[R2:%[gilo][0-7]]]
+; abs64: sethi %hh([[BLK:.+]]), [[R2:%[gilo][0-7]]]
+; abs64: sethi %hi([[BLK]]), [[R:%[gilo][0-7]]]
 ; abs64: add [[R2]], %hm([[BLK]]), [[R3:%[gilo][0-7]]]
+; abs64: add [[R]], %lo([[BLK]]), [[R1:%[gilo][0-7]]]
 ; abs64: sllx [[R3]], 32,  [[R4:%[gilo][0-7]]]
 ; abs64: call dummy
 ; abs64: add [[R2]], [[R1]], %o0

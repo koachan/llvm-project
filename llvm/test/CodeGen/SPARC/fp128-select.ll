@@ -10,16 +10,16 @@ define fp128 @f128_select_soft(fp128 %a, fp128 %b) #0 {
 ; V9-NEXT:    .cfi_window_save
 ; V9-NEXT:    .cfi_register %o7, %i7
 ; V9-NEXT:    add %sp, 2175, %o0
-; V9-NEXT:    or %o0, 8, %o0
-; V9-NEXT:    std %f6, [%o0]
 ; V9-NEXT:    std %f4, [%sp+2175]
-; V9-NEXT:    ldx [%o0], %o0
-; V9-NEXT:    ldx [%sp+2175], %o1
-; V9-NEXT:    sethi 0, %o2
-; V9-NEXT:    or %o2, 0, %o2
 ; V9-NEXT:    sethi 2097152, %o3
+; V9-NEXT:    sethi 0, %o2
+; V9-NEXT:    or %o0, 8, %o0
+; V9-NEXT:    ldx [%sp+2175], %o1
 ; V9-NEXT:    or %o3, 0, %o3
+; V9-NEXT:    or %o2, 0, %o2
+; V9-NEXT:    std %f6, [%o0]
 ; V9-NEXT:    sllx %o3, 32, %o3
+; V9-NEXT:    ldx [%o0], %o0
 ; V9-NEXT:    or %o3, %o2, %o2
 ; V9-NEXT:    xor %o1, %o2, %o1
 ; V9-NEXT:    or %o0, %o1, %o0
@@ -52,24 +52,24 @@ define fp128 @f128_select_hard(fp128 %a, fp128 %b) #1 {
 ; V9-NEXT:    .cfi_def_cfa_register %fp
 ; V9-NEXT:    .cfi_window_save
 ; V9-NEXT:    .cfi_register %o7, %i7
-; V9-NEXT:    stq %f4, [%sp+2175]
-; V9-NEXT:    add %sp, 2175, %o0
-; V9-NEXT:    or %o0, 8, %o0
-; V9-NEXT:    ldx [%o0], %o0
-; V9-NEXT:    ldx [%sp+2175], %o1
-; V9-NEXT:    sethi 0, %o2
-; V9-NEXT:    or %o2, 0, %o2
 ; V9-NEXT:    sethi %h44(.LCPI1_0), %o3
+; V9-NEXT:    add %sp, 2175, %o0
+; V9-NEXT:    stq %f4, [%sp+2175]
+; V9-NEXT:    sethi 2097152, %o5
+; V9-NEXT:    sethi 0, %o2
 ; V9-NEXT:    add %o3, %m44(.LCPI1_0), %o3
+; V9-NEXT:    or %o0, 8, %o0
+; V9-NEXT:    ldx [%sp+2175], %o1
+; V9-NEXT:    or %o2, 0, %o2
 ; V9-NEXT:    sllx %o3, 12, %o3
-; V9-NEXT:    ldq [%o3+%l44(.LCPI1_0)], %f4
-; V9-NEXT:    sethi 2097152, %o3
-; V9-NEXT:    or %o3, 0, %o3
+; V9-NEXT:    ldx [%o0], %o0
+; V9-NEXT:    ldq [%o3+%l44(.LCPI1_0)], %f28
+; V9-NEXT:    or %o5, 0, %o3
 ; V9-NEXT:    sllx %o3, 32, %o3
 ; V9-NEXT:    or %o3, %o2, %o2
 ; V9-NEXT:    xor %o1, %o2, %o1
 ; V9-NEXT:    or %o0, %o1, %o0
-; V9-NEXT:    fmovrqz %o0, %f4, %f0
+; V9-NEXT:    fmovrqz %o0, %f28, %f0
 ; V9-NEXT:    retl
 ; V9-NEXT:    add %sp, 144, %sp
 entry:

@@ -31,9 +31,9 @@ define i32 @test_used_more_than_once(i32 %x) nounwind {
 ; SPARC-NEXT:    sethi 31, %o1
 ; SPARC-NEXT:    or %o1, 1023, %o1
 ; SPARC-NEXT:    or %o0, %o1, %o2
-; SPARC-NEXT:    and %o0, %o1, %o0
+; SPARC-NEXT:    and %o0, %o1, %o5
 ; SPARC-NEXT:    retl
-; SPARC-NEXT:    xor %o2, %o0, %o0
+; SPARC-NEXT:    xor %o2, %o5, %o0
 entry:
   %0 = or i32 %x, 32767
   %and = and i32 %x, 32767

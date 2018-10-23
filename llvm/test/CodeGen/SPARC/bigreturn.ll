@@ -92,9 +92,15 @@ define i32 @call_ret_i32_arr(i32 %0) {
 ; SPARC-NEXT:    .cfi_def_cfa_register %fp
 ; SPARC-NEXT:    .cfi_window_save
 ; SPARC-NEXT:    .cfi_register %o7, %i7
+<<<<<<< HEAD
 ; SPARC-NEXT:    mov %i0, %o0
 ; SPARC-NEXT:    add %fp, -64, %i0
 ; SPARC-NEXT:    st %i0, [%sp+64]
+=======
+; SPARC-NEXT:    add %fp, -64, %i1
+; SPARC-NEXT:    mov %i0, %o0
+; SPARC-NEXT:    st %i1, [%sp+64]
+>>>>>>> d90959f9b0f6 ([Sparc] Enable anti-dependency breaker pass)
 ; SPARC-NEXT:    call ret_i32_arr
 ; SPARC-NEXT:    nop
 ; SPARC-NEXT:    unimp 64
@@ -220,10 +226,17 @@ define i64 @call_ret_i64_arr(i64 %0) {
 ; SPARC-NEXT:    .cfi_def_cfa_register %fp
 ; SPARC-NEXT:    .cfi_window_save
 ; SPARC-NEXT:    .cfi_register %o7, %i7
+<<<<<<< HEAD
 ; SPARC-NEXT:    mov %i1, %o1
 ; SPARC-NEXT:    mov %i0, %o0
 ; SPARC-NEXT:    add %fp, -128, %i0
 ; SPARC-NEXT:    st %i0, [%sp+64]
+=======
+; SPARC-NEXT:    add %fp, -128, %i2
+; SPARC-NEXT:    mov %i0, %o0
+; SPARC-NEXT:    mov %i1, %o1
+; SPARC-NEXT:    st %i2, [%sp+64]
+>>>>>>> d90959f9b0f6 ([Sparc] Enable anti-dependency breaker pass)
 ; SPARC-NEXT:    call ret_i64_arr
 ; SPARC-NEXT:    nop
 ; SPARC-NEXT:    unimp 128

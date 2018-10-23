@@ -39,15 +39,15 @@ entry:
 define i32 @extra_arg_leaf(i32 %i) #0 {
 ; V8-LABEL: extra_arg_leaf:
 ; V8:       ! %bb.0: ! %entry
-; V8-NEXT:    mov 12, %o1
 ; V8-NEXT:    mov %o7, %g1
+; V8-NEXT:    mov 12, %o1
 ; V8-NEXT:    call foo2
 ; V8-NEXT:    mov %g1, %o7
 ;
 ; V9-LABEL: extra_arg_leaf:
 ; V9:       ! %bb.0: ! %entry
-; V9-NEXT:    mov 12, %o1
 ; V9-NEXT:    mov %o7, %g1
+; V9-NEXT:    mov 12, %o1
 ; V9-NEXT:    call foo2
 ; V9-NEXT:    mov %g1, %o7
 entry:
@@ -78,26 +78,26 @@ define void @caller_extern(ptr %src) optsize #0 {
 ; V8-LABEL: caller_extern:
 ; V8:       ! %bb.0: ! %entry
 ; V8-NEXT:    sethi %hi(dest), %o1
-; V8-NEXT:    add %o1, %lo(dest), %o1
-; V8-NEXT:    mov 7, %o2
+; V8-NEXT:    mov %o7, %g1
 ; V8-NEXT:    mov %o0, %o3
+; V8-NEXT:    mov 7, %o2
+; V8-NEXT:    add %o1, %lo(dest), %o1
 ; V8-NEXT:    mov %o1, %o0
 ; V8-NEXT:    mov %o3, %o1
-; V8-NEXT:    mov %o7, %g1
 ; V8-NEXT:    call memcpy
 ; V8-NEXT:    mov %g1, %o7
 ;
 ; V9-LABEL: caller_extern:
 ; V9:       ! %bb.0: ! %entry
 ; V9-NEXT:    sethi %h44(dest), %o1
+; V9-NEXT:    mov %o7, %g1
+; V9-NEXT:    mov %o0, %o3
+; V9-NEXT:    mov 7, %o2
 ; V9-NEXT:    add %o1, %m44(dest), %o1
 ; V9-NEXT:    sllx %o1, 12, %o1
 ; V9-NEXT:    add %o1, %l44(dest), %o1
-; V9-NEXT:    mov 7, %o2
-; V9-NEXT:    mov %o0, %o3
 ; V9-NEXT:    mov %o1, %o0
 ; V9-NEXT:    mov %o3, %o1
-; V9-NEXT:    mov %o7, %g1
 ; V9-NEXT:    call memcpy
 ; V9-NEXT:    mov %g1, %o7
 entry:
@@ -161,9 +161,9 @@ define i32 @caller_args() #0 {
 ; V8-NEXT:    mov 3, %o3
 ; V8-NEXT:    mov 4, %o4
 ; V8-NEXT:    mov 5, %o5
-; V8-NEXT:    st %i0, [%sp+92]
-; V8-NEXT:    call foo7
 ; V8-NEXT:    mov %g0, %o0
+; V8-NEXT:    call foo7
+; V8-NEXT:    st %i0, [%sp+92]
 ; V8-NEXT:    ret
 ; V8-NEXT:    restore %g0, %o0, %o0
 ;
@@ -176,9 +176,9 @@ define i32 @caller_args() #0 {
 ; V9-NEXT:    mov 3, %o3
 ; V9-NEXT:    mov 4, %o4
 ; V9-NEXT:    mov 5, %o5
-; V9-NEXT:    stx %i0, [%sp+2223]
-; V9-NEXT:    call foo7
 ; V9-NEXT:    mov %g0, %o0
+; V9-NEXT:    call foo7
+; V9-NEXT:    stx %i0, [%sp+2223]
 ; V9-NEXT:    ret
 ; V9-NEXT:    restore %g0, %o0, %o0
 entry:
@@ -195,9 +195,9 @@ define i32 @caller_byval() #0 {
 ; V8:       ! %bb.0: ! %entry
 ; V8-NEXT:    save %sp, -104, %sp
 ; V8-NEXT:    ld [%fp+-4], %i0
-; V8-NEXT:    st %i0, [%fp+-8]
-; V8-NEXT:    call callee_byval
 ; V8-NEXT:    add %fp, -8, %o0
+; V8-NEXT:    call callee_byval
+; V8-NEXT:    st %i0, [%fp+-8]
 ; V8-NEXT:    ret
 ; V8-NEXT:    restore %g0, %o0, %o0
 ;
@@ -243,8 +243,8 @@ define void @ret_large_struct(ptr noalias sret(%struct.big) %agg.result) #0 {
 ; V8-NEXT:    save %sp, -96, %sp
 ; V8-NEXT:    ld [%fp+64], %i0
 ; V8-NEXT:    sethi %hi(bigstruct), %i1
-; V8-NEXT:    add %i1, %lo(bigstruct), %o1
 ; V8-NEXT:    mov 400, %o2
+; V8-NEXT:    add %i1, %lo(bigstruct), %o1
 ; V8-NEXT:    call memcpy
 ; V8-NEXT:    mov %i0, %o0
 ; V8-NEXT:    jmp %i7+12
@@ -253,6 +253,7 @@ define void @ret_large_struct(ptr noalias sret(%struct.big) %agg.result) #0 {
 ; V9-LABEL: ret_large_struct:
 ; V9:       ! %bb.0: ! %entry
 ; V9-NEXT:    save %sp, -176, %sp
+<<<<<<< HEAD
 ; V9-NEXT:    mov %i0, %o0
 ; V9-NEXT:    sethi %h44(bigstruct), %i0
 ; V9-NEXT:    add %i0, %m44(bigstruct), %i0
@@ -260,6 +261,15 @@ define void @ret_large_struct(ptr noalias sret(%struct.big) %agg.result) #0 {
 ; V9-NEXT:    add %i0, %l44(bigstruct), %o1
 ; V9-NEXT:    call memcpy
 ; V9-NEXT:    mov 400, %o2
+=======
+; V9-NEXT:    sethi %h44(bigstruct), %i1
+; V9-NEXT:    mov 400, %o2
+; V9-NEXT:    mov %i0, %o0
+; V9-NEXT:    add %i1, %m44(bigstruct), %i1
+; V9-NEXT:    sllx %i1, 12, %i1
+; V9-NEXT:    call memcpy
+; V9-NEXT:    add %i1, %l44(bigstruct), %o1
+>>>>>>> d90959f9b0f6 ([Sparc] Enable anti-dependency breaker pass)
 ; V9-NEXT:    ret
 ; V9-NEXT:    restore
 entry:

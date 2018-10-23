@@ -6,13 +6,13 @@ define i32 @test(i32 %a, ptr %va) nounwind {
 ; CHECK:       ! %bb.0: ! %entry
 ; CHECK-NEXT:    save %sp, -96, %sp
 ; CHECK-NEXT:    add %i1, 8, %i0
+; CHECK-NEXT:    add %i1, 12, %i2
 ; CHECK-NEXT:    st %i0, [%fp+-4]
 ; CHECK-NEXT:    ld [%i1+4], %i0
-; CHECK-NEXT:    add %i1, 12, %i2
 ; CHECK-NEXT:    st %i2, [%fp+-4]
-; CHECK-NEXT:    ld [%i1+8], %i1
+; CHECK-NEXT:    ld [%i1+8], %i5
 ; CHECK-NEXT:    ret
-; CHECK-NEXT:    restore %i1, %i0, %o0
+; CHECK-NEXT:    restore %i5, %i0, %o0
 entry:
   %va.addr = alloca ptr, align 4
   store ptr %va, ptr %va.addr, align 4
