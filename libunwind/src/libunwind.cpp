@@ -68,7 +68,11 @@ _LIBUNWIND_HIDDEN int __unw_init_local(unw_cursor_t *cursor,
 #elif defined(__mips__)
 # warning The MIPS architecture is not supported with this ABI and environment!
 #elif defined(__sparc__)
-# define REGISTER_KIND Registers_sparc
+# if defined(__arch64__)
+#  define REGISTER_KIND Registers_sparc64
+# else
+#  define REGISTER_KIND Registers_sparc
+# endif // __arch64__
 #elif defined(__riscv)
 # define REGISTER_KIND Registers_riscv
 #elif defined(__ve__)

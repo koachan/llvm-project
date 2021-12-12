@@ -769,7 +769,7 @@ DEFINE_LIBUNWIND_FUNCTION(__unw_getcontext)
 @
 @ On entry:
 @  thread_state pointer is in r0
-@ 
+@
 @ Per EHABI #4.7 this only saves the core integer registers.
 @ EHABI #7.4.5 notes that in general all VRS registers should be restored
 @ however this is very hard to do for VFP registers because it is unknown
@@ -1001,6 +1001,60 @@ DEFINE_LIBUNWIND_FUNCTION(__unw_getcontext)
 
 #elif defined(__sparc__)
 
+#if defined(__arch64__)
+
+#
+# extern int unw_getcontext(unw_context_t* thread_state)
+#
+# On entry:
+#  thread_state pointer is in %o0
+#
+DEFINE_LIBUNWIND_FUNCTION(unw_getcontext)
+  stx	%g1, [%o0 + 0x08]
+  stx	%g2, [%o0 + 0x10]
+  stx	%g3, [%o0 + 0x18]
+  stx	%g4, [%o0 + 0x20]
+  stx	%g5, [%o0 + 0x28]
+  stx	%g6, [%o0 + 0x30]
+  stx	%g7, [%o0 + 0x38]
+  stx	%o0, [%o0 + 0x40]
+  stx	%o1, [%o0 + 0x48]
+  stx	%o2, [%o0 + 0x50]
+  stx	%o3, [%o0 + 0x58]
+  stx	%o4, [%o0 + 0x60]
+  stx	%o5, [%o0 + 0x68]
+  stx	%o6, [%o0 + 0x70]
+  stx	%o7, [%o0 + 0x78]
+  stx	%l0, [%o0 + 0x80]
+  stx	%l1, [%o0 + 0x88]
+  stx	%l2, [%o0 + 0x90]
+  stx	%l3, [%o0 + 0x98]
+  stx	%l4, [%o0 + 0xa0]
+  stx	%l5, [%o0 + 0xa8]
+  stx	%l6, [%o0 + 0xb0]
+  stx	%l7, [%o0 + 0xb8]
+  stx	%i0, [%o0 + 0xc0]
+  stx	%i1, [%o0 + 0xc8]
+  stx	%i2, [%o0 + 0xd0]
+  stx	%i3, [%o0 + 0xd8]
+  stx	%i4, [%o0 + 0xe0]
+  stx	%i5, [%o0 + 0xe8]
+  stx	%i6, [%o0 + 0xf0]
+  stx	%i7, [%o0 + 0xf8]
+
+  # save StackGhost cookie
+  add	%i7, %g0, %g4
+  save	%sp, -176, %sp
+  # register window flush necessary even without StackGhost
+  flushw
+  restore
+  ldx	[%sp + 2047 + 0x78], %g5
+  xor	%g4, %g5, %g4
+  retl
+   stx	%g4, [%o0 + 0x100]
+
+#else
+
 #
 # extern int __unw_getcontext(unw_context_t* thread_state)
 #
@@ -1028,6 +1082,8 @@ DEFINE_LIBUNWIND_FUNCTION(__unw_getcontext)
   std %i6, [%o0 + 120]
   jmp %o7
    clr %o0                   // return UNW_ESUCCESS
+
+#endif // __arch64__
 
 #elif defined(__riscv)
 

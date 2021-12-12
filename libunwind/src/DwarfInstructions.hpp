@@ -67,7 +67,7 @@ private:
       return (pint_t)((sint_t)registers.getRegister((int)prolog.cfaRegister) +
              prolog.cfaRegisterOffset);
     if (prolog.cfaExpression != 0)
-      return evaluateExpression((pint_t)prolog.cfaExpression, addressSpace, 
+      return evaluateExpression((pint_t)prolog.cfaExpression, addressSpace,
                                 registers, 0);
     assert(0 && "getCFA(): unknown location");
     __builtin_unreachable();
@@ -82,6 +82,10 @@ typename A::pint_t DwarfInstructions<A, R>::getSavedRegister(
   switch (savedReg.location) {
   case CFI_Parser<A>::kRegisterInCFA:
     return (pint_t)addressSpace.getRegister(cfa + (pint_t)savedReg.value);
+
+  case CFI_Parser<A>::kRegisterInCFADecrypt:
+    return addressSpace.getP(cfa + (pint_t)savedReg.value)
+        ^ registers.getWCookie();
 
   case CFI_Parser<A>::kRegisterAtExpression:
     return (pint_t)addressSpace.getRegister(evaluateExpression(
@@ -124,6 +128,7 @@ double DwarfInstructions<A, R>::getSavedFloatRegister(
   case CFI_Parser<A>::kRegisterIsExpression:
   case CFI_Parser<A>::kRegisterUnused:
   case CFI_Parser<A>::kRegisterOffsetFromCFA:
+  case CFI_Parser<A>::kRegisterInCFADecrypt:
     // FIX ME
     break;
   }
@@ -148,6 +153,7 @@ v128 DwarfInstructions<A, R>::getSavedVectorRegister(
   case CFI_Parser<A>::kRegisterUndefined:
   case CFI_Parser<A>::kRegisterOffsetFromCFA:
   case CFI_Parser<A>::kRegisterInRegister:
+  case CFI_Parser<A>::kRegisterInCFADecrypt:
     // FIX ME
     break;
   }
@@ -256,7 +262,7 @@ int DwarfInstructions<A, R>::stepWithDwarf(A &addressSpace, pint_t pc,
       }
 #endif
 
-#if defined(_LIBUNWIND_TARGET_SPARC)
+#if defined(_LIBUNWIND_TARGET_SPARC) || defined(_LIBUNWIND_TARGET_SPARC64)
       if (R::getArch() == REGISTERS_SPARC) {
         // Skip call site instruction and delay slot
         returnAddress += 8;
