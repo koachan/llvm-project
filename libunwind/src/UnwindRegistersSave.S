@@ -1004,12 +1004,12 @@ DEFINE_LIBUNWIND_FUNCTION(__unw_getcontext)
 #if defined(__arch64__)
 
 #
-# extern int unw_getcontext(unw_context_t* thread_state)
+# extern int __unw_getcontext(unw_context_t* thread_state)
 #
 # On entry:
 #  thread_state pointer is in %o0
 #
-DEFINE_LIBUNWIND_FUNCTION(unw_getcontext)
+DEFINE_LIBUNWIND_FUNCTION(__unw_getcontext)
   stx	%g1, [%o0 + 0x08]
   stx	%g2, [%o0 + 0x10]
   stx	%g3, [%o0 + 0x18]

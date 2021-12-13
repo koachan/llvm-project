@@ -3744,7 +3744,7 @@ inline const char *Registers_sparc64::getRegisterName(int regNum) {
     return "o4";
   case UNW_SPARC_O5:
     return "o5";
-  case UNW_SPARC_SP:
+  case UNW_REG_SP:
   case UNW_SPARC_O6:
     return "o6";
   case UNW_SPARC_O7:
