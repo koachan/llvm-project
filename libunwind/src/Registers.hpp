@@ -3677,13 +3677,16 @@ inline uint64_t Registers_sparc64::getRegister(int regNum) const {
 inline void Registers_sparc64::setRegister(int regNum, uint64_t value) {
   if (regNum >= UNW_SPARC_G0 && regNum <= UNW_SPARC_I7) {
       _registers.__regs[regNum] = value;
+      return;
   }
 
   switch (regNum) {
   case UNW_REG_IP:
     _registers.__regs[UNW_SPARC_O7] = value;
+    return;
   case UNW_REG_SP:
     _registers.__regs[UNW_SPARC_O6] = value;
+    return;
   }
   _LIBUNWIND_ABORT("unsupported sparc64 register");
 }
