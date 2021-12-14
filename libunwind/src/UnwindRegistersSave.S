@@ -1010,6 +1010,7 @@ DEFINE_LIBUNWIND_FUNCTION(__unw_getcontext)
 #  thread_state pointer is in %o0
 #
 DEFINE_LIBUNWIND_FUNCTION(__unw_getcontext)
+  stx	%g0, [%o0 + 0x00]
   stx	%g1, [%o0 + 0x08]
   stx	%g2, [%o0 + 0x10]
   stx	%g3, [%o0 + 0x18]
@@ -1050,8 +1051,9 @@ DEFINE_LIBUNWIND_FUNCTION(__unw_getcontext)
   restore
   ldx	[%sp + 2047 + 0x78], %g5
   xor	%g4, %g5, %g4
+  stx	%g4, [%o0 + 0x100]
   retl
-   stx	%g4, [%o0 + 0x100]
+   clr %o0 # return UNW_ESUCCESS
 
 #else
 
