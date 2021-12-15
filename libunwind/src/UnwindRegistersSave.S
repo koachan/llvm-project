@@ -1053,7 +1053,8 @@ DEFINE_LIBUNWIND_FUNCTION(__unw_getcontext)
   xor	%g4, %g5, %g4
   stx	%g4, [%o0 + 0x100]
   retl
-   clr %o0 # return UNW_ESUCCESS
+  # return UNW_ESUCCESS
+   clr %o0
 
 #else
 
