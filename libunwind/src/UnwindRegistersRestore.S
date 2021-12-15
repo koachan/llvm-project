@@ -1074,19 +1074,6 @@ DEFINE_LIBUNWIND_FUNCTION(_ZN9libunwind17Registers_sparc646jumptoEv)
 //  thread_state pointer is in %o0
 //
   flushw
-  ldx	[%o0 + 0x08], %g1
-  ldx	[%o0 + 0x10], %g2
-  ldx	[%o0 + 0x18], %g3
-  ldx	[%o0 + 0x20], %g4
-  ldx	[%o0 + 0x28], %g5
-  ldx	[%o0 + 0x30], %g6
-  ldx	[%o0 + 0x38], %g7
-  ldx	[%o0 + 0x48], %o1
-  ldx	[%o0 + 0x50], %o2
-  ldx	[%o0 + 0x58], %o3
-  ldx	[%o0 + 0x60], %o4
-  ldx	[%o0 + 0x68], %o5
-  ldx	[%o0 + 0x70], %o6
   ldx	[%o0 + 0x78], %o7
   ldx	[%o0 + 0x80], %l0
   ldx	[%o0 + 0x88], %l1
@@ -1103,9 +1090,8 @@ DEFINE_LIBUNWIND_FUNCTION(_ZN9libunwind17Registers_sparc646jumptoEv)
   ldx	[%o0 + 0xe0], %i4
   ldx	[%o0 + 0xe8], %i5
   ldx	[%o0 + 0xf0], %i6
-  ldx	[%o0 + 0xf8], %i7
   jmpl	%o7, %g0
-   ldx	[%o0 + 0x40], %o0
+   ldx	[%o0 + 0xf8], %i7
 
 #else
 
