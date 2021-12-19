@@ -1090,7 +1090,7 @@ DEFINE_LIBUNWIND_FUNCTION(_ZN9libunwind17Registers_sparc646jumptoEv)
   ldx	[%o0 + 0xe0], %i4
   ldx	[%o0 + 0xe8], %i5
   ldx	[%o0 + 0xf0], %i6
-  jmpl	%o7, %g0
+  jmp	%o7
    ldx	[%o0 + 0xf8], %i7
 
 #else
