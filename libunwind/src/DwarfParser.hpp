@@ -751,7 +751,7 @@ bool CFI_Parser<A>::parseFDEInstructions(A &addressSpace,
         } break;
 #endif
 
-#if defined(_LIBUNWIND_TARGET_SPARC) || defined(_LIBUNWIND_TARGET_SPARC64)
+#if defined(_LIBUNWIND_TARGET_SPARC)
         // case DW_CFA_GNU_window_save:
         case REGISTERS_SPARC:
           _LIBUNWIND_TRACE_DWARF("DW_CFA_GNU_window_save()\n");
@@ -760,6 +760,20 @@ bool CFI_Parser<A>::parseFDEInstructions(A &addressSpace,
                                  ((int64_t)reg - UNW_SPARC_O0) + UNW_SPARC_I0,
                                  initialState);
           }
+
+          for (reg = UNW_SPARC_L0; reg <= UNW_SPARC_I7; reg++) {
+            results->setRegister(reg, kRegisterInCFA,
+                                 ((int64_t)reg - UNW_SPARC_L0) * 4,
+                                 initialState);
+          }
+          break;
+#endif
+
+#if defined(_LIBUNWIND_TARGET_SPARC64)
+        // case DW_CFA_GNU_window_save:
+        case REGISTERS_SPARC:
+          // Don't save %o0-%o7 on sparc64.
+          // https://reviews.llvm.org/D32450#736405
 
           for (reg = UNW_SPARC_L0; reg <= UNW_SPARC_I7; reg++) {
             if (reg == UNW_SPARC_I7)
@@ -773,9 +787,10 @@ bool CFI_Parser<A>::parseFDEInstructions(A &addressSpace,
           }
           _LIBUNWIND_TRACE_DWARF("DW_CFA_GNU_window_save\n");
           break;
-#endif
         }
         break;
+#endif
+
 #else
         (void)arch;
 #endif

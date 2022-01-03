@@ -1062,9 +1062,7 @@ DEFINE_LIBUNWIND_FUNCTION(_ZN9libunwind21Registers_mips_newabi6jumptoEv)
   ld    $4, (8 * 4)($4)
   .set pop
 
-#elif defined(__sparc__)
-
-#if defined(__arch64__)
+#elif defined(__sparc__) && defined(__arch64__)
 
 DEFINE_LIBUNWIND_FUNCTION(_ZN9libunwind17Registers_sparc646jumptoEv)
 //
@@ -1107,7 +1105,7 @@ DEFINE_LIBUNWIND_FUNCTION(_ZN9libunwind17Registers_sparc646jumptoEv)
   jmp	%o7
    ldx	[%o0 + 0x40], %o0
 
-#else
+#elif defined(__sparc__)
 
 //
 // void libunwind::Registers_sparc_o32::jumpto()
@@ -1128,8 +1126,6 @@ DEFINE_LIBUNWIND_FUNCTION(_ZN9libunwind15Registers_sparc6jumptoEv)
   ld  [%o0 + 60],  %o7
   jmp %o7
    nop
-
-#endif // __arch64__
 
 #elif defined(__riscv)
 

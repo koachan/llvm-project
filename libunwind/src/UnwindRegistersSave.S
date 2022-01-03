@@ -769,7 +769,7 @@ DEFINE_LIBUNWIND_FUNCTION(__unw_getcontext)
 @
 @ On entry:
 @  thread_state pointer is in r0
-@
+@ 
 @ Per EHABI #4.7 this only saves the core integer registers.
 @ EHABI #7.4.5 notes that in general all VRS registers should be restored
 @ however this is very hard to do for VFP registers because it is unknown
@@ -999,9 +999,7 @@ DEFINE_LIBUNWIND_FUNCTION(__unw_getcontext)
 
   jumpr r31
 
-#elif defined(__sparc__)
-
-#if defined(__arch64__)
+#elif defined(__sparc__) && defined(__arch64__)
 
 #
 # extern int __unw_getcontext(unw_context_t* thread_state)
@@ -1043,7 +1041,7 @@ DEFINE_LIBUNWIND_FUNCTION(__unw_getcontext)
   stx	%i7, [%o0 + 0xf8]
 
   # save StackGhost cookie
-  add	%i7, %g0, %g4
+  mov	%i7, %g4
   save	%sp, -176, %sp
   # register window flush necessary even without StackGhost
   flushw
@@ -1055,7 +1053,7 @@ DEFINE_LIBUNWIND_FUNCTION(__unw_getcontext)
   # return UNW_ESUCCESS
    clr %o0
 
-#else
+#elif defined(__sparc__)
 
 #
 # extern int __unw_getcontext(unw_context_t* thread_state)
@@ -1084,8 +1082,6 @@ DEFINE_LIBUNWIND_FUNCTION(__unw_getcontext)
   std %i6, [%o0 + 120]
   jmp %o7
    clr %o0                   // return UNW_ESUCCESS
-
-#endif // __arch64__
 
 #elif defined(__riscv)
 
