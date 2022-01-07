@@ -262,13 +262,20 @@ int DwarfInstructions<A, R>::stepWithDwarf(A &addressSpace, pint_t pc,
       }
 #endif
 
-#if defined(_LIBUNWIND_TARGET_SPARC) || defined(_LIBUNWIND_TARGET_SPARC64)
+#if defined(_LIBUNWIND_TARGET_SPARC)
       if (R::getArch() == REGISTERS_SPARC) {
         // Skip call site instruction and delay slot
         returnAddress += 8;
         // Skip unimp instruction if function returns a struct
         if ((addressSpace.get32(returnAddress) & 0xC1C00000) == 0)
           returnAddress += 4;
+      }
+#endif
+
+#if defined(_LIBUNWIND_TARGET_SPARC64)
+      if (R::getArch() == REGISTERS_SPARC) {
+        // Skip call site instruction and delay slot
+        returnAddress += 8;
       }
 #endif
 
