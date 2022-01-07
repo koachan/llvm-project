@@ -306,7 +306,6 @@ public:
   void      setR15(uint64_t value) { _registers.__r15 = value; }
   uint64_t  getWCookie() const     { return 0; }
 
-
 private:
   struct GPRs {
     uint64_t __rax;
