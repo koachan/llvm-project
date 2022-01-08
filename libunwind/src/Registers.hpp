@@ -3618,8 +3618,8 @@ public:
   static int  lastDwarfRegNum() { return _LIBUNWIND_HIGHEST_DWARF_REGISTER_SPARC64; }
   static int  getArch() { return REGISTERS_SPARC; }
 
-  uint64_t  getSP() const         { return _registers.__regs[UNW_SPARC_O6]; }
-  void      setSP(uint64_t value) { _registers.__regs[UNW_SPARC_O6] = value; }
+  uint64_t  getSP() const         { return _registers.__regs[UNW_SPARC_O6] + 2047; }
+  void      setSP(uint64_t value) { _registers.__regs[UNW_SPARC_O6] = value - 2047; }
   uint64_t  getIP() const         { return _registers.__regs[UNW_SPARC_O7]; }
   void      setIP(uint64_t value) { _registers.__regs[UNW_SPARC_O7] = value; }
   uint64_t  getWCookie() const    { return _wcookie; }
@@ -3668,7 +3668,7 @@ inline uint64_t Registers_sparc64::getRegister(int regNum) const {
   case UNW_REG_IP:
     return _registers.__regs[UNW_SPARC_O7];
   case UNW_REG_SP:
-    return _registers.__regs[UNW_SPARC_O6];
+    return _registers.__regs[UNW_SPARC_O6] + 2047;
   }
   _LIBUNWIND_ABORT("unsupported sparc64 register");
 }
@@ -3684,7 +3684,7 @@ inline void Registers_sparc64::setRegister(int regNum, uint64_t value) {
     _registers.__regs[UNW_SPARC_O7] = value;
     return;
   case UNW_REG_SP:
-    _registers.__regs[UNW_SPARC_O6] = value;
+    _registers.__regs[UNW_SPARC_O6] = value - 2047;
     return;
   }
   _LIBUNWIND_ABORT("unsupported sparc64 register");
