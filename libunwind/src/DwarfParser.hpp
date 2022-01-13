@@ -787,9 +787,9 @@ bool CFI_Parser<A>::parseFDEInstructions(A &addressSpace,
           }
           _LIBUNWIND_TRACE_DWARF("DW_CFA_GNU_window_save\n");
           break;
+#endif
         }
         break;
-#endif
 
 #else
         (void)arch;
