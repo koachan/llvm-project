@@ -1008,6 +1008,10 @@ DEFINE_LIBUNWIND_FUNCTION(__unw_getcontext)
 #  thread_state pointer is in %o0
 #
 DEFINE_LIBUNWIND_FUNCTION(__unw_getcontext)
+  .register %g2, #scratch
+  .register %g3, #scratch
+  .register %g6, #scratch
+  .register %g7, #scratch
   stx	%g1, [%o0 + 0x08]
   stx	%g2, [%o0 + 0x10]
   stx	%g3, [%o0 + 0x18]

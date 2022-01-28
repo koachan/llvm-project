@@ -1071,6 +1071,10 @@ DEFINE_LIBUNWIND_FUNCTION(_ZN9libunwind17Registers_sparc646jumptoEv)
 // On entry:
 //  thread_state pointer is in %o0
 //
+  .register %g2, #scratch
+  .register %g3, #scratch
+  .register %g6, #scratch
+  .register %g7, #scratch
   flushw
   ldx	[%o0 + 0x08], %g1
   ldx	[%o0 + 0x10], %g2
