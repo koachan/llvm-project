@@ -771,7 +771,7 @@ bool CFI_Parser<A>::parseFDEInstructions(A &addressSpace,
 
 #if defined(_LIBUNWIND_TARGET_SPARC64)
         // case DW_CFA_GNU_window_save:
-        case REGISTERS_SPARC:
+        case REGISTERS_SPARC64:
           // Don't save %o0-%o7 on sparc64.
           // https://reviews.llvm.org/D32450#736405
 

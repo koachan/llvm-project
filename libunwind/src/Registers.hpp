@@ -35,6 +35,7 @@ enum {
   REGISTERS_MIPS_O32,
   REGISTERS_MIPS_NEWABI,
   REGISTERS_SPARC,
+  REGISTERS_SPARC64,
   REGISTERS_HEXAGON,
   REGISTERS_RISCV,
   REGISTERS_VE,
@@ -3616,7 +3617,7 @@ public:
   const char *getRegisterName(int num);
   void        jumpto();
   static int  lastDwarfRegNum() { return _LIBUNWIND_HIGHEST_DWARF_REGISTER_SPARC64; }
-  static int  getArch() { return REGISTERS_SPARC; }
+  static int  getArch() { return REGISTERS_SPARC64; }
 
   uint64_t  getSP() const         { return _registers.__regs[UNW_SPARC_O6] + 2047; }
   void      setSP(uint64_t value) { _registers.__regs[UNW_SPARC_O6] = value - 2047; }
