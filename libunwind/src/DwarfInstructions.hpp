@@ -273,7 +273,7 @@ int DwarfInstructions<A, R>::stepWithDwarf(A &addressSpace, pint_t pc,
 #endif
 
 #if defined(_LIBUNWIND_TARGET_SPARC64)
-      if (R::getArch() == REGISTERS_SPARC) {
+      if (R::getArch() == REGISTERS_SPARC64) {
         // Skip call site instruction and delay slot
         returnAddress += 8;
       }
