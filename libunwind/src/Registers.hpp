@@ -88,6 +88,8 @@ public:
   void      setESI(uint32_t value) { _registers.__esi = value; }
   uint32_t  getEDI() const         { return _registers.__edi; }
   void      setEDI(uint32_t value) { _registers.__edi = value; }
+  // The sparc64-specific kRegisterInCFADecrypt uses getWCookie.
+  // We define getWCookie to a dummy value for other targets.
   uint32_t  getWCookie() const     { return 0; }
 
 private:
@@ -305,6 +307,8 @@ public:
   void      setR14(uint64_t value) { _registers.__r14 = value; }
   uint64_t  getR15() const         { return _registers.__r15; }
   void      setR15(uint64_t value) { _registers.__r15 = value; }
+  // The sparc64-specific kRegisterInCFADecrypt uses getWCookie.
+  // We define getWCookie to a dummy value for other targets.
   uint64_t  getWCookie() const     { return 0; }
 
 private:
@@ -611,6 +615,8 @@ public:
   void      setSP(uint32_t value) { _registers.__r1 = value; }
   uint64_t  getIP() const         { return _registers.__srr0; }
   void      setIP(uint32_t value) { _registers.__srr0 = value; }
+  // The sparc64-specific kRegisterInCFADecrypt uses getWCookie.
+  // We define getWCookie to a dummy value for other targets.
   uint64_t  getWCookie() const    { return 0; }
 
 private:
@@ -1178,6 +1184,8 @@ public:
   void      setSP(uint64_t value) { _registers.__r1 = value; }
   uint64_t  getIP() const         { return _registers.__srr0; }
   void      setIP(uint64_t value) { _registers.__srr0 = value; }
+  // The sparc64-specific kRegisterInCFADecrypt uses getWCookie.
+  // We define getWCookie to a dummy value for other targets.
   uint64_t  getWCookie() const    { return 0; }
 
 private:
@@ -1826,6 +1834,8 @@ public:
   void      setIP(uint64_t value) { _registers.__pc = value; }
   uint64_t  getFP() const         { return _registers.__fp; }
   void      setFP(uint64_t value) { _registers.__fp = value; }
+  // The sparc64-specific kRegisterInCFADecrypt uses getWCookie.
+  // We define getWCookie to a dummy value for other targets.
   uint64_t  getWCookie() const    { return 0; }
 
 private:
@@ -2115,6 +2125,8 @@ public:
   void      setSP(uint32_t value) { _registers.__sp = value; }
   uint32_t  getIP() const         { return _registers.__pc; }
   void      setIP(uint32_t value) { _registers.__pc = value; }
+  // The sparc64-specific kRegisterInCFADecrypt uses getWCookie.
+  // We define getWCookie to a dummy value for other targets.
   uint32_t  getWCookie() const    { return 0; }
 
   void saveVFPAsX() {
@@ -2616,6 +2628,8 @@ public:
   void      setSP(uint32_t value) { _registers.__r[1] = value; }
   uint64_t  getIP() const         { return _registers.__pc; }
   void      setIP(uint32_t value) { _registers.__pc = value; }
+  // The sparc64-specific kRegisterInCFADecrypt uses getWCookie.
+  // We define getWCookie to a dummy value for other targets.
   uint64_t  getWCookie() const    { return 0; }
 
 private:
@@ -2814,6 +2828,8 @@ public:
   void      setSP(uint32_t value) { _registers.__r[29] = value; }
   uint32_t  getIP() const         { return _registers.__pc; }
   void      setIP(uint32_t value) { _registers.__pc = value; }
+  // The sparc64-specific kRegisterInCFADecrypt uses getWCookie.
+  // We define getWCookie to a dummy value for other targets.
   uint32_t  getWCookie() const    { return 0; }
 
 private:
@@ -3142,6 +3158,8 @@ public:
   void      setSP(uint64_t value) { _registers.__r[29] = value; }
   uint64_t  getIP() const         { return _registers.__pc; }
   void      setIP(uint64_t value) { _registers.__pc = value; }
+  // The sparc64-specific kRegisterInCFADecrypt uses getWCookie.
+  // We define getWCookie to a dummy value for other targets.
   uint64_t  getWCookie() const    { return 0; }
 
 private:
@@ -3438,6 +3456,8 @@ public:
   void      setSP(uint32_t value) { _registers.__regs[UNW_SPARC_O6] = value; }
   uint64_t  getIP() const         { return _registers.__regs[UNW_SPARC_O7]; }
   void      setIP(uint32_t value) { _registers.__regs[UNW_SPARC_O7] = value; }
+  // The sparc64-specific kRegisterInCFADecrypt uses getWCookie.
+  // We define getWCookie to a dummy value for other targets.
   uint64_t  getWCookie() const    { return 0; }
 
 private:
@@ -3630,8 +3650,8 @@ private:
     uint64_t __regs[32];
   };
 
-  sparc64_thread_state_t _registers;
-  uint64_t _wcookie;
+  sparc64_thread_state_t _registers{};
+  uint64_t _wcookie = 0;
 };
 
 inline Registers_sparc64::Registers_sparc64(const void *registers) {
@@ -3644,7 +3664,6 @@ inline Registers_sparc64::Registers_sparc64(const void *registers) {
 }
 
 inline Registers_sparc64::Registers_sparc64() {
-  memset(&_registers, 0, sizeof(_registers));
   _wcookie = 0;
 }
 
@@ -3661,9 +3680,8 @@ inline bool Registers_sparc64::validRegister(int regNum) const {
 }
 
 inline uint64_t Registers_sparc64::getRegister(int regNum) const {
-  if (regNum >= UNW_SPARC_G0 && regNum <= UNW_SPARC_I7) {
-      return _registers.__regs[regNum];
-  }
+  if (regNum >= UNW_SPARC_G0 && regNum <= UNW_SPARC_I7)
+    return _registers.__regs[regNum];
 
   switch (regNum) {
   case UNW_REG_IP:
@@ -3676,8 +3694,8 @@ inline uint64_t Registers_sparc64::getRegister(int regNum) const {
 
 inline void Registers_sparc64::setRegister(int regNum, uint64_t value) {
   if (regNum >= UNW_SPARC_G0 && regNum <= UNW_SPARC_I7) {
-      _registers.__regs[regNum] = value;
-      return;
+    _registers.__regs[regNum] = value;
+    return;
   }
 
   switch (regNum) {
@@ -3691,9 +3709,7 @@ inline void Registers_sparc64::setRegister(int regNum, uint64_t value) {
   _LIBUNWIND_ABORT("unsupported sparc64 register");
 }
 
-inline bool Registers_sparc64::validFloatRegister(int) const {
-  return false;
-}
+inline bool Registers_sparc64::validFloatRegister(int) const { return false; }
 
 inline double Registers_sparc64::getFloatRegister(int) const {
   _LIBUNWIND_ABORT("no sparc64 float registers");
@@ -3703,9 +3719,7 @@ inline void Registers_sparc64::setFloatRegister(int, double) {
   _LIBUNWIND_ABORT("no sparc64 float registers");
 }
 
-inline bool Registers_sparc64::validVectorRegister(int) const {
-  return false;
-}
+inline bool Registers_sparc64::validVectorRegister(int) const { return false; }
 
 inline v128 Registers_sparc64::getVectorRegister(int) const {
   _LIBUNWIND_ABORT("no sparc64 vector registers");
@@ -3817,6 +3831,8 @@ public:
   void      setSP(uint32_t value) { _registers.__r[UNW_HEXAGON_R29] = value; }
   uint32_t  getIP() const         { return _registers.__r[UNW_HEXAGON_PC]; }
   void      setIP(uint32_t value) { _registers.__r[UNW_HEXAGON_PC] = value; }
+  // The sparc64-specific kRegisterInCFADecrypt uses getWCookie.
+  // We define getWCookie to a dummy value for other targets.
   uint32_t  getWCookie() const    { return 0; }
 
 private:
@@ -4031,6 +4047,8 @@ public:
   void        setSP(reg_t value) { _registers[2] = value; }
   reg_t       getIP() const { return _registers[0]; }
   void        setIP(reg_t value) { _registers[0] = value; }
+  // The sparc64-specific kRegisterInCFADecrypt uses getWCookie.
+  // We define getWCookie to a dummy value for other targets.
   reg_t       getWCookie() const    { return 0; }
 
 private:
@@ -4318,6 +4336,8 @@ public:
   void      setSP(uint64_t value) { _registers.__s[11] = value; }
   uint64_t  getIP() const         { return _registers.__ic; }
   void      setIP(uint64_t value) { _registers.__ic = value; }
+  // The sparc64-specific kRegisterInCFADecrypt uses getWCookie.
+  // We define getWCookie to a dummy value for other targets.
   uint64_t  getWCookie() const    { return 0; }
 
 private:

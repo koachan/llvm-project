@@ -83,7 +83,7 @@ typename A::pint_t DwarfInstructions<A, R>::getSavedRegister(
   case CFI_Parser<A>::kRegisterInCFA:
     return (pint_t)addressSpace.getRegister(cfa + (pint_t)savedReg.value);
 
-  case CFI_Parser<A>::kRegisterInCFADecrypt:
+  case CFI_Parser<A>::kRegisterInCFADecrypt: // sparc64 specific
     return addressSpace.getP(cfa + (pint_t)savedReg.value) ^
            registers.getWCookie();
 
@@ -273,10 +273,9 @@ int DwarfInstructions<A, R>::stepWithDwarf(A &addressSpace, pint_t pc,
 #endif
 
 #if defined(_LIBUNWIND_TARGET_SPARC64)
-      if (R::getArch() == REGISTERS_SPARC64) {
-        // Skip call site instruction and delay slot
+      // Skip call site instruction and delay slot
+      if (R::getArch() == REGISTERS_SPARC64)
         returnAddress += 8;
-      }
 #endif
 
 #if defined(_LIBUNWIND_TARGET_PPC64)
