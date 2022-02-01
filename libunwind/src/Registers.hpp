@@ -3622,7 +3622,7 @@ inline const char *Registers_sparc::getRegisterName(int regNum) {
 /// sparc process.
 class _LIBUNWIND_HIDDEN Registers_sparc64 {
 public:
-  Registers_sparc64();
+  Registers_sparc64() = default;
   Registers_sparc64(const void *registers);
 
   bool        validRegister(int num) const;
@@ -3661,10 +3661,6 @@ inline Registers_sparc64::Registers_sparc64(const void *registers) {
          sizeof(_registers));
   memcpy(&_wcookie, static_cast<const uint8_t *>(registers) + sizeof(_registers),
 	 sizeof(_wcookie));
-}
-
-inline Registers_sparc64::Registers_sparc64() {
-  _wcookie = 0;
 }
 
 inline bool Registers_sparc64::validRegister(int regNum) const {
