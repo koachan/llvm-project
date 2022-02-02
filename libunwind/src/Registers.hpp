@@ -3659,8 +3659,9 @@ inline Registers_sparc64::Registers_sparc64(const void *registers) {
                 "sparc64 registers do not fit into unw_context_t");
   memcpy(&_registers, static_cast<const uint8_t *>(registers),
          sizeof(_registers));
-  memcpy(&_wcookie, static_cast<const uint8_t *>(registers) + sizeof(_registers),
-	 sizeof(_wcookie));
+  memcpy(&_wcookie,
+         static_cast<const uint8_t *>(registers) + sizeof(_registers),
+         sizeof(_wcookie));
 }
 
 inline bool Registers_sparc64::validRegister(int regNum) const {
