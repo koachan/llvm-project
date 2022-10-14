@@ -154,7 +154,16 @@ static bool isI64CondBranchOpcode(int Opc) {
          Opc == SP::BPXCCANT;
 }
 
-static bool isFCondBranchOpcode(int Opc) { return Opc == SP::FBCOND; }
+// V9 FP branches need special treatment since it takes an
+// additional register parameter.
+static bool isV9FCondBranchOpcode(int Opc) {
+  return Opc == SP::BPFCC || Opc == SP::BPFCCA || Opc == SP::BPFCCNT ||
+         Opc == SP::BPFCCANT;
+}
+
+static bool isFCondBranchOpcode(int Opc) {
+  return Opc == SP::FBCOND || isV9FCondBranchOpcode(Opc);
+}
 
 static bool isCondBranchOpcode(int Opc) {
   return isI32CondBranchOpcode(Opc) || isI64CondBranchOpcode(Opc) ||
@@ -174,6 +183,12 @@ static void parseCondBranch(MachineInstr *LastInst, MachineBasicBlock *&Target,
   // it can use the information to emit the correct SPARC branch opcode.
   Cond.push_back(MachineOperand::CreateImm(Opc));
   Cond.push_back(MachineOperand::CreateImm(CC));
+
+  if (isV9FCondBranchOpcode(Opc)) {
+      // v9 FP branches need an additional operand
+      // to specify the CCR to branch on.
+      Cond.push_back(LastInst->getOperand(2));
+  }
 
   Target = LastInst->getOperand(0).getMBB();
 }
@@ -268,8 +283,8 @@ unsigned SparcInstrInfo::insertBranch(MachineBasicBlock &MBB,
                                       const DebugLoc &DL,
                                       int *BytesAdded) const {
   assert(TBB && "insertBranch must not be told to insert a fallthrough");
-  assert((Cond.size() <= 2) &&
-         "Sparc branch conditions should have at most two components!");
+  assert((Cond.size() <= 3) &&
+         "Sparc branch conditions should have at most three components!");
   assert(!BytesAdded && "code size not handled");
 
   if (Cond.empty()) {
@@ -285,7 +300,13 @@ unsigned SparcInstrInfo::insertBranch(MachineBasicBlock &MBB,
   if (IsIntegerCC(CC)) {
     BuildMI(&MBB, DL, get(Opc)).addMBB(TBB).addImm(CC);
   } else {
-    BuildMI(&MBB, DL, get(SP::FBCOND)).addMBB(TBB).addImm(CC);
+    if (isV9FCondBranchOpcode(Opc)) {
+      // v9 FP branches explicitly select which CCR to branch on.
+      Register Reg = Cond[2].getReg();
+      BuildMI(&MBB, DL, get(Opc)).addMBB(TBB).addImm(CC).addReg(Reg);
+    } else {
+      BuildMI(&MBB, DL, get(Opc)).addMBB(TBB).addImm(CC);
+    }
   }
   if (!FBB)
     return 1;
@@ -319,7 +340,7 @@ unsigned SparcInstrInfo::removeBranch(MachineBasicBlock &MBB,
 
 bool SparcInstrInfo::reverseBranchCondition(
     SmallVectorImpl<MachineOperand> &Cond) const {
-  assert(Cond.size() <= 2);
+  assert(Cond.size() <= 3);
   SPCC::CondCodes CC = static_cast<SPCC::CondCodes>(Cond[1].getImm());
   Cond[1].setImm(GetOppositeBranchCondition(CC));
   return false;

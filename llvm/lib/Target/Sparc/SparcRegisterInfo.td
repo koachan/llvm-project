@@ -355,7 +355,7 @@ def LowDFPRegs : RegisterClass<"SP", [f64], 64, (sequence "D%u", 0, 15)>;
 def LowQFPRegs : RegisterClass<"SP", [f128], 128, (sequence "Q%u", 0, 7)>;
 
 // Floating point control register classes.
-def FCCRegs : RegisterClass<"SP", [i1], 1, (sequence "FCC%u", 0, 3)>;
+def FCCRegs : RegisterClass<"SP", [i32], 1, (sequence "FCC%u", 0, 3)>;
 
 let isAllocatable = 0 in {
   // Ancillary state registers

@@ -119,9 +119,9 @@ entry:
 
 ; V9-LABEL: test_float_cc
 ; V9:       fcmpd
-; V9:       {{fbl|fbuge}} .LBB
+; V9:       {{fbl|fbuge}} %fcc0, .LBB
 ; V9:       fcmpd
-; V9:       {{fbule|fbg}} .LBB
+; V9:       {{fbule|fbg}} %fcc0, .LBB
 
    %0 = fcmp uge double %a, 0.000000e+00
    br i1 %0, label %loop, label %loop.2

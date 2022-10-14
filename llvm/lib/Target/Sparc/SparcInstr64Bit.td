@@ -477,10 +477,10 @@ def : Pat<(SPselecticc i64:$t, i64:$f, imm:$cond),
 def : Pat<(SPselecticc (i64 simm11:$t), i64:$f, imm:$cond),
           (MOVICCri (as_i32imm $t), $f, imm:$cond)>;
 
-def : Pat<(SPselectfcc i64:$t, i64:$f, imm:$cond),
-          (MOVFCCrr $t, $f, imm:$cond)>;
-def : Pat<(SPselectfcc (i64 simm11:$t), i64:$f, imm:$cond),
-          (MOVFCCri (as_i32imm $t), $f, imm:$cond)>;
+def : Pat<(SPv9selectfcc i64:$t, i64:$f, imm:$cond, i32:$cc),
+          (V9MOVFCCrr i32:$cc, $t, $f, imm:$cond)>;
+def : Pat<(SPv9selectfcc (i64 simm11:$t), i64:$f, imm:$cond, i32:$cc),
+          (V9MOVFCCri i32:$cc, (as_i32imm $t), $f, imm:$cond)>;
 
 } // Predicates = [Is64Bit]
 

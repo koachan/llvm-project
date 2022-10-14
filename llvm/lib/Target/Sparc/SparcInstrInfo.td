@@ -231,6 +231,14 @@ SDTypeProfile<1, 1, [SDTCisVT<0, f64>, SDTCisFP<1>]>;
 def SDTSPXTOF :
 SDTypeProfile<1, 1, [SDTCisFP<0>, SDTCisVT<1, f64>]>;
 
+// V9 FP compare, branch, and select
+def SDTSPv9cmpfcc :
+SDTypeProfile<1, 2, [SDTCisVT<0, i32>, SDTCisFP<1>, SDTCisSameAs<1, 2>]>;
+def SDTSPv9brfcc :
+SDTypeProfile<0, 3, [SDTCisVT<0, OtherVT>, SDTCisVT<1, i32>, SDTCisVT<2, i32>]>;
+def SDTSPv9selectcc :
+SDTypeProfile<1, 4, [SDTCisSameAs<0, 1>, SDTCisSameAs<1, 2>, SDTCisVT<3, i32>, SDTCisVT<4, i32>]>;
+
 def SDTSPtlsadd :
 SDTypeProfile<1, 3, [SDTCisInt<0>, SDTCisSameAs<0, 1>, SDTCisPtrTy<2>]>;
 def SDTSPtlsld :
@@ -246,6 +254,10 @@ def SPbpicc : SDNode<"SPISD::BPICC", SDTSPbrcc, [SDNPHasChain, SDNPInGlue]>;
 def SPbpxcc : SDNode<"SPISD::BPXCC", SDTSPbrcc, [SDNPHasChain, SDNPInGlue]>;
 def SPbrfcc : SDNode<"SPISD::BRFCC", SDTSPbrcc, [SDNPHasChain, SDNPInGlue]>;
 
+// V9 FP compare and branch
+def SPv9cmpfcc : SDNode<"SPISD::CMPFCC_V9", SDTSPv9cmpfcc, []>;
+def SPv9brfcc : SDNode<"SPISD::BRFCC_V9", SDTSPv9brfcc, [SDNPHasChain]>;
+
 def SPhi    : SDNode<"SPISD::Hi", SDTIntUnaryOp>;
 def SPlo    : SDNode<"SPISD::Lo", SDTIntUnaryOp>;
 
@@ -257,6 +269,7 @@ def SPxtof  : SDNode<"SPISD::XTOF", SDTSPXTOF>;
 def SPselecticc : SDNode<"SPISD::SELECT_ICC", SDTSPselectcc, [SDNPInGlue]>;
 def SPselectxcc : SDNode<"SPISD::SELECT_XCC", SDTSPselectcc, [SDNPInGlue]>;
 def SPselectfcc : SDNode<"SPISD::SELECT_FCC", SDTSPselectcc, [SDNPInGlue]>;
+def SPv9selectfcc : SDNode<"SPISD::SELECT_FCC_V9", SDTSPv9selectcc, []>;
 
 //  These are target-independent nodes, but have target-specific formats.
 def SDT_SPCallSeqStart : SDCallSeqStart<[ SDTCisVT<0, i32>,
@@ -941,7 +954,9 @@ class FPBranchSPA<dag ins, string asmstr, list<dag> pattern>
 multiclass FPredBranch {
   def CC    : F2_3<0b101, 0, 1, (outs), (ins bprtarget:$imm19, CCOp:$cond,
                                          FCCRegs:$cc),
-                  "fb$cond $cc, $imm19", [], IIC_fpu_normal_instr>;
+                  "fb$cond $cc, $imm19",
+                  [(SPv9brfcc bb:$imm19, imm:$cond, i32:$cc)],
+                  IIC_fpu_normal_instr>;
   def CCA   : F2_3<0b101, 1, 1, (outs), (ins bprtarget:$imm19, CCOp:$cond,
                                          FCCRegs:$cc),
                   "fb$cond,a $cc, $imm19", [], IIC_fpu_normal_instr>;
@@ -1488,20 +1503,6 @@ let Predicates = [HasV9], Constraints = "$f = $rd" in {
                     (SPselecticc simm11:$simm11, i32:$f, imm:$cond))]>;
   }
 
-  let Uses = [FCC0], intcc = 0, cc = 0b00 in {
-    def MOVFCCrr
-      : F4_1<0b101100, (outs IntRegs:$rd),
-             (ins IntRegs:$rs2, IntRegs:$f, CCOp:$cond),
-             "mov$cond %fcc0, $rs2, $rd",
-             [(set i32:$rd, (SPselectfcc i32:$rs2, i32:$f, imm:$cond))]>;
-    def MOVFCCri
-      : F4_2<0b101100, (outs IntRegs:$rd),
-             (ins i32imm:$simm11, IntRegs:$f, CCOp:$cond),
-             "mov$cond %fcc0, $simm11, $rd",
-             [(set i32:$rd,
-                    (SPselectfcc simm11:$simm11, i32:$f, imm:$cond))]>;
-  }
-
   let Uses = [ICC], intcc = 1, opf_cc = 0b00 in {
     def FMOVS_ICC
       : F4_3<0b110101, 0b000001, (outs FPRegs:$rd),
@@ -1520,26 +1521,6 @@ let Predicates = [HasV9], Constraints = "$f = $rd" in {
                "fmovq$cond %icc, $rs2, $rd",
                [(set f128:$rd, (SPselecticc f128:$rs2, f128:$f, imm:$cond))]>;
   }
-
-  let Uses = [FCC0], intcc = 0, opf_cc = 0b00 in {
-    def FMOVS_FCC
-      : F4_3<0b110101, 0b000001, (outs FPRegs:$rd),
-             (ins FPRegs:$rs2, FPRegs:$f, CCOp:$cond),
-             "fmovs$cond %fcc0, $rs2, $rd",
-             [(set f32:$rd, (SPselectfcc f32:$rs2, f32:$f, imm:$cond))]>;
-    def FMOVD_FCC
-      : F4_3<0b110101, 0b000010, (outs DFPRegs:$rd),
-             (ins DFPRegs:$rs2, DFPRegs:$f, CCOp:$cond),
-             "fmovd$cond %fcc0, $rs2, $rd",
-             [(set f64:$rd, (SPselectfcc f64:$rs2, f64:$f, imm:$cond))]>;
-    let Predicates = [HasV9, HasHardQuad] in
-    def FMOVQ_FCC
-      : F4_3<0b110101, 0b000011, (outs QFPRegs:$rd),
-             (ins QFPRegs:$rs2, QFPRegs:$f, CCOp:$cond),
-             "fmovq$cond %fcc0, $rs2, $rd",
-             [(set f128:$rd, (SPselectfcc f128:$rs2, f128:$f, imm:$cond))]>;
-  }
-
 }
 
 // Floating-Point Move Instructions, p. 164 of the V9 manual.
@@ -1573,15 +1554,18 @@ let Predicates = [HasV9] in {
 
 // Floating-point compare instruction with %fcc0-%fcc3.
 def V9FCMPS  : F3_3c<2, 0b110101, 0b001010001,
-               (outs FCCRegs:$rd), (ins FPRegs:$rs1, FPRegs:$rs2),
-               "fcmps $rd, $rs1, $rs2", []>;
+                (outs FCCRegs:$rd), (ins FPRegs:$rs1, FPRegs:$rs2),
+                "fcmps $rd, $rs1, $rs2",
+                [(set i32:$rd, (SPv9cmpfcc f32:$rs1, f32:$rs2))]>;
 def V9FCMPD  : F3_3c<2, 0b110101, 0b001010010,
                 (outs FCCRegs:$rd), (ins DFPRegs:$rs1, DFPRegs:$rs2),
-                "fcmpd $rd, $rs1, $rs2", []>;
+                "fcmpd $rd, $rs1, $rs2",
+                [(set i32:$rd, (SPv9cmpfcc f64:$rs1, f64:$rs2))]>;
 def V9FCMPQ  : F3_3c<2, 0b110101, 0b001010011,
                 (outs FCCRegs:$rd), (ins QFPRegs:$rs1, QFPRegs:$rs2),
-                "fcmpq $rd, $rs1, $rs2", []>,
-                 Requires<[HasHardQuad]>;
+                "fcmpq $rd, $rs1, $rs2",
+                [(set i32:$rd, (SPv9cmpfcc f128:$rs1, f128:$rs2))]>,
+                Requires<[HasHardQuad]>;
 
 let hasSideEffects = 1 in {
   def V9FCMPES  : F3_3c<2, 0b110101, 0b001010101,
@@ -1602,24 +1586,33 @@ let Predicates = [HasV9] in {
     def V9MOVFCCrr
       : F4_1<0b101100, (outs IntRegs:$rd),
              (ins FCCRegs:$cc, IntRegs:$rs2, IntRegs:$f, CCOp:$cond),
-             "mov$cond $cc, $rs2, $rd", []>;
+             "mov$cond $cc, $rs2, $rd",
+             [(set i32:$rd, (SPv9selectfcc i32:$rs2, i32:$f, imm:$cond, i32:$cc))]>;
     def V9MOVFCCri
       : F4_2<0b101100, (outs IntRegs:$rd),
              (ins FCCRegs:$cc, i32imm:$simm11, IntRegs:$f, CCOp:$cond),
-             "mov$cond $cc, $simm11, $rd", []>;
+             "mov$cond $cc, $simm11, $rd",
+             [(set i32:$rd,
+               (SPv9selectfcc simm11:$simm11, i32:$f, imm:$cond, i32:$cc))]>;
     def V9FMOVS_FCC
       : F4_3<0b110101, 0b000001, (outs FPRegs:$rd),
              (ins FCCRegs:$opf_cc, FPRegs:$rs2, FPRegs:$f, CCOp:$cond),
-             "fmovs$cond $opf_cc, $rs2, $rd", []>;
+             "fmovs$cond $opf_cc, $rs2, $rd",
+             [(set f32:$rd,
+               (SPv9selectfcc f32:$rs2, f32:$f, imm:$cond, i32:$opf_cc))]>;
     def V9FMOVD_FCC
       : F4_3<0b110101, 0b000010, (outs DFPRegs:$rd),
              (ins FCCRegs:$opf_cc, DFPRegs:$rs2, DFPRegs:$f, CCOp:$cond),
-             "fmovd$cond $opf_cc, $rs2, $rd", []>;
+             "fmovd$cond $opf_cc, $rs2, $rd",
+             [(set f64:$rd,
+               (SPv9selectfcc f64:$rs2, f64:$f, imm:$cond, i32:$opf_cc))]>;
     let Predicates = [HasV9, HasHardQuad] in
     def V9FMOVQ_FCC
       : F4_3<0b110101, 0b000011, (outs QFPRegs:$rd),
              (ins FCCRegs:$opf_cc, QFPRegs:$rs2, QFPRegs:$f, CCOp:$cond),
-             "fmovq$cond $opf_cc, $rs2, $rd", []>;
+             "fmovq$cond $opf_cc, $rs2, $rd",
+             [(set f128:$rd,
+               (SPv9selectfcc f128:$rs2, f128:$f, imm:$cond, i32:$opf_cc))]>;
   } // Constraints = "$f = $rd", ...
 } // let Predicates = [hasV9]
 
