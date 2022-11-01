@@ -13,6 +13,7 @@
 #include "SparcInstrInfo.h"
 #include "Sparc.h"
 #include "SparcMachineFunctionInfo.h"
+#include "SparcRegisterInfo.h"
 #include "SparcSubtarget.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/ADT/SmallVector.h"
@@ -470,6 +471,11 @@ storeRegToStackSlot(MachineBasicBlock &MBB, MachineBasicBlock::iterator I,
     // lowered into two STDs in eliminateFrameIndex.
     BuildMI(MBB, I, DL, get(SP::STQFri)).addFrameIndex(FI).addImm(0)
       .addReg(SrcReg,  getKillRegState(isKill)).addMemOperand(MMO);
+  else if (RC == &SP::FCCRegsRegClass)
+    BuildMI(MBB, I, DL, get(SP::STXFSRri))
+        .addFrameIndex(FI)
+        .addImm(0)
+        .addMemOperand(MMO);
   else
     llvm_unreachable("Can't store this register to stack slot");
 }
@@ -508,6 +514,11 @@ loadRegFromStackSlot(MachineBasicBlock &MBB, MachineBasicBlock::iterator I,
     // lowered into two LDDs in eliminateFrameIndex.
     BuildMI(MBB, I, DL, get(SP::LDQFri), DestReg).addFrameIndex(FI).addImm(0)
       .addMemOperand(MMO);
+  else if (RC == &SP::FCCRegsRegClass)
+    BuildMI(MBB, I, DL, get(SP::LDXFSRri))
+        .addFrameIndex(FI)
+        .addImm(0)
+        .addMemOperand(MMO);
   else
     llvm_unreachable("Can't load this register from stack slot");
 }

@@ -25,6 +25,10 @@ def sub_even : SubRegIndex<32>;
 def sub_odd  : SubRegIndex<32, 32>;
 def sub_even64 : SubRegIndex<64>;
 def sub_odd64  : SubRegIndex<64, 64>;
+def sub_fcc0 : SubRegIndex<2, 10>;
+def sub_fcc1 : SubRegIndex<2, 32>;
+def sub_fcc2 : SubRegIndex<2, 34>;
+def sub_fcc3 : SubRegIndex<2, 36>;
 }
 
 // Registers are identified with 5-bit ID numbers.
@@ -59,7 +63,14 @@ def ICC : SparcCtrlReg<0, "ICC">; // This represents icc and xcc in 64-bit code.
 foreach I = 0-3 in
   def FCC#I : SparcCtrlReg<I, "FCC"#I>;
 
-def FSR : SparcCtrlReg<0, "FSR">; // Floating-point state register.
+// Floating-point state register.
+def FSR : SparcCtrlReg<0, "FSR"> {
+  // FCC registers are subregisters of the FSR.
+  // See section 5.1.7, Floating-Point State Register (FSR)
+  // of the SPARC v9 Manual.
+  let SubRegs = [FCC0, FCC1, FCC2, FCC3];
+  let SubRegIndices = [sub_fcc0, sub_fcc1, sub_fcc2, sub_fcc3];
+}
 
 def FQ : SparcCtrlReg<0, "FQ">; // Floating-point deferred-trap queue.
 
@@ -355,7 +366,11 @@ def LowDFPRegs : RegisterClass<"SP", [f64], 64, (sequence "D%u", 0, 15)>;
 def LowQFPRegs : RegisterClass<"SP", [f128], 128, (sequence "Q%u", 0, 7)>;
 
 // Floating point control register classes.
-def FCCRegs : RegisterClass<"SP", [i32], 1, (sequence "FCC%u", 0, 3)>;
+def FCCRegs : RegisterClass<"SP", [i32], 64, (sequence "FCC%u", 0, 3)> {
+  // FCC can only be spilled as a group together with other subregisters
+  // in FSR, so when it's spilled into memory it'll take a whole 64 bits.
+  let Size = 64;
+}
 
 let isAllocatable = 0 in {
   // Ancillary state registers

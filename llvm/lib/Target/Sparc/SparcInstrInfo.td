@@ -604,7 +604,7 @@ let DecoderMethod = "DecodeLoadCPPair" in
   defm LDDC   : Load<"ldd", 0b110011, load, CoprocPair, v2i32, IIC_ldd>;
 
 let DecoderMethod = "DecodeLoadCP", Defs = [CPSR] in {
-  let rd = 0 in {
+  let rd = 0, mayLoad = 1 in {
     def LDCSRrr : F3_1<3, 0b110001, (outs), (ins MEMrr:$addr),
                        "ld [$addr], %csr", []>;
     def LDCSRri : F3_2<3, 0b110001, (outs), (ins MEMri:$addr),
@@ -613,7 +613,7 @@ let DecoderMethod = "DecodeLoadCP", Defs = [CPSR] in {
 }
 
 let DecoderMethod = "DecodeLoadFP" in
-  let Defs = [FSR] in {
+  let mayLoad = 1, Defs = [FSR] in {
     let rd = 0 in {
       def LDFSRrr : F3_1<3, 0b100001, (outs), (ins MEMrr:$addr),
                      "ld [$addr], %fsr", [], IIC_iu_or_fpu_instr>;
@@ -669,39 +669,39 @@ let DecoderMethod = "DecodeStoreCPPair" in
   defm STDC   : Store<"std", 0b110111, store, CoprocPair, v2i32, IIC_std>;
 
 let DecoderMethod = "DecodeStoreCP", rd = 0 in {
-  let Defs = [CPSR] in {
-    def STCSRrr : F3_1<3, 0b110101, (outs MEMrr:$addr), (ins),
+  let Uses = [CPSR] in {
+    def STCSRrr : F3_1<3, 0b110101, (outs), (ins MEMrr:$addr),
                        "st %csr, [$addr]", [], IIC_st>;
-    def STCSRri : F3_2<3, 0b110101, (outs MEMri:$addr), (ins),
+    def STCSRri : F3_2<3, 0b110101, (outs), (ins MEMri:$addr),
                        "st %csr, [$addr]", [], IIC_st>;
   }
-  let Defs = [CPQ] in {
-    def STDCQrr : F3_1<3, 0b110110, (outs MEMrr:$addr), (ins),
+  let Uses = [CPQ] in {
+    def STDCQrr : F3_1<3, 0b110110, (outs), (ins MEMrr:$addr),
                        "std %cq, [$addr]", [], IIC_std>;
-    def STDCQri : F3_2<3, 0b110110, (outs MEMri:$addr), (ins),
+    def STDCQri : F3_2<3, 0b110110, (outs), (ins MEMri:$addr),
                        "std %cq, [$addr]", [], IIC_std>;
   }
 }
 
 let DecoderMethod = "DecodeStoreFP" in {
-  let rd = 0 in {
-    let Defs = [FSR] in {
-      def STFSRrr : F3_1<3, 0b100101, (outs MEMrr:$addr), (ins),
+  let rd = 0, mayStore = 1 in {
+    let Uses = [FSR] in {
+      def STFSRrr : F3_1<3, 0b100101, (outs), (ins MEMrr:$addr),
                      "st %fsr, [$addr]", [], IIC_st>;
-      def STFSRri : F3_2<3, 0b100101, (outs MEMri:$addr), (ins),
+      def STFSRri : F3_2<3, 0b100101, (outs), (ins MEMri:$addr),
                      "st %fsr, [$addr]", [], IIC_st>;
     }
-    let Defs = [FQ] in {
-      def STDFQrr : F3_1<3, 0b100110, (outs MEMrr:$addr), (ins),
+    let mayStore = 1, Uses = [FQ] in {
+      def STDFQrr : F3_1<3, 0b100110, (outs), (ins MEMrr:$addr),
                      "std %fq, [$addr]", [], IIC_std>;
-      def STDFQri : F3_2<3, 0b100110, (outs MEMri:$addr), (ins),
+      def STDFQri : F3_2<3, 0b100110, (outs), (ins MEMri:$addr),
                      "std %fq, [$addr]", [], IIC_std>;
     }
   }
-  let rd = 1, Defs = [FSR] in {
-    def STXFSRrr : F3_1<3, 0b100101, (outs MEMrr:$addr), (ins),
+  let rd = 1, mayStore = 1, Uses = [FSR] in {
+    def STXFSRrr : F3_1<3, 0b100101, (outs), (ins MEMrr:$addr),
                    "stx %fsr, [$addr]", []>, Requires<[HasV9]>;
-    def STXFSRri : F3_2<3, 0b100101, (outs MEMri:$addr), (ins),
+    def STXFSRri : F3_2<3, 0b100101, (outs), (ins MEMri:$addr),
                    "stx %fsr, [$addr]", []>, Requires<[HasV9]>;
   }
 }
