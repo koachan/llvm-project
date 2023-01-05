@@ -90,11 +90,8 @@ static MCOperand LowerOperand(const MachineInstr *MI,
   return MCOperand();
 }
 
-void llvm::LowerSparcMachineInstrToMCInst(const MachineInstr *MI,
-                                          MCInst &OutMI,
-                                          AsmPrinter &AP)
-{
-
+void llvm::LowerSparcMachineInstrToMCInst(const MachineInstr *MI, MCInst &OutMI,
+                                          AsmPrinter &AP) {
   OutMI.setOpcode(MI->getOpcode());
 
   for (const MachineOperand &MO : MI->operands()) {

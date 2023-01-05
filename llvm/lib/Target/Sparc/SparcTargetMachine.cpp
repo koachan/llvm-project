@@ -32,6 +32,10 @@ extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeSparcTarget() {
   initializeSparcDAGToDAGISelPass(PR);
 }
 
+static cl::opt<bool>
+    BranchRelaxation("sparc-enable-branch-relax", cl::Hidden, cl::init(true),
+                     cl::desc("Relax out of range conditional branches"));
+
 static std::string computeDataLayout(const Triple &T, bool is64Bit) {
   // Sparc is typically big endian, but some are little.
   std::string Ret = T.getArch() == Triple::sparcel ? "e" : "E";
@@ -182,6 +186,14 @@ bool SparcPassConfig::addInstSelector() {
 }
 
 void SparcPassConfig::addPreEmitPass(){
+  // If targeting v9, relax conditional branch instructions if they're
+  // otherwise out of range of their destination.
+  // This converts smaller v9 branch types to be able to reach +- 8 MiB.
+  // There's no need to do this when targeting v8 since all v8 branches
+  // can reach the full +- 8 MiB range.
+  if (getSparcTargetMachine().getSubtargetImpl()->isV9() && BranchRelaxation)
+    addPass(&BranchRelaxationPassID);
+
   addPass(createSparcDelaySlotFillerPass());
 
   if (this->getSparcTargetMachine().getSubtargetImpl()->insertNOPLoad())
