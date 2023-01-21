@@ -42,7 +42,7 @@ static unsigned adjustFixupValue(unsigned Kind, uint64_t Value) {
     return (Value >> 2) & 0x7ffff;
 
   case Sparc::fixup_sparc_br16_2:
-    return (Value >> 2) & 0xc000;
+    return ((Value >> 2) & 0xc000) << 6;
 
   case Sparc::fixup_sparc_br16_14:
     return (Value >> 2) & 0x3fff;
