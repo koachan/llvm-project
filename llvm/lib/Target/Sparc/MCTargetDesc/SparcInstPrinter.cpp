@@ -12,6 +12,7 @@
 
 #include "SparcInstPrinter.h"
 #include "Sparc.h"
+#include "SparcMCTargetDesc.h"
 #include "llvm/MC/MCExpr.h"
 #include "llvm/MC/MCInst.h"
 #include "llvm/MC/MCRegisterInfo.h"
@@ -235,4 +236,14 @@ void SparcInstPrinter::printMembarTag(const MCInst *MI, int opNum,
       First = false;
     }
   }
+}
+
+void SparcInstPrinter::printASITag(const MCInst *MI, int opNum,
+                                   const MCSubtargetInfo &STI, raw_ostream &O) {
+  unsigned Imm = MI->getOperand(opNum).getImm();
+  auto ASITag = SparcASITag::lookupASITagByEncoding(Imm);
+  if (ASITag)
+    O << '#' << ASITag->Name;
+  else
+    O << Imm;
 }

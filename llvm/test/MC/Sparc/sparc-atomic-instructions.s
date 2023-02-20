@@ -10,7 +10,7 @@
         ! CHECK: swap [%i0+32], %o2    ! encoding: [0xd4,0x7e,0x20,0x20]
         swap [%i0+32], %o2
 
-        ! CHECK: swapa [%i0+%l6] 131, %o2   ! encoding: [0xd4,0xfe,0x10,0x76]
+        ! CHECK: swapa [%i0+%l6] #ASI_SNF, %o2   ! encoding: [0xd4,0xfe,0x10,0x76]
         swapa [%i0+%l6] 131, %o2
 
         ! CHECK: ldstub [%i0+40], %g1 ! encoding: [0xc2,0x6e,0x20,0x28]
@@ -19,5 +19,5 @@
         ! CHECK: ldstub [%i0+%i2], %g1 ! encoding: [0xc2,0x6e,0x00,0x1a]
         ldstub [%i0+%i2], %g1
 
-        ! CHECK: ldstuba [%i0+%i2] 131, %g1 ! encoding: [0xc2,0xee,0x10,0x7a]
+        ! CHECK: ldstuba [%i0+%i2] #ASI_SNF, %g1 ! encoding: [0xc2,0xee,0x10,0x7a]
         ldstuba [%i0+%i2] 131, %g1

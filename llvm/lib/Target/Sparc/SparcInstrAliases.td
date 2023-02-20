@@ -320,6 +320,8 @@ defm : int_cond_alias<"vs",   0b0111>;
 let EmitPriority = 0 in
 {
   defm : int_cond_alias<"",     0b1000>; // same as a; gnu asm, not in manual
+  defm : int_cond_alias<"gt",   0b0011>; // same as g; gnu asm, not in manual
+  defm : int_cond_alias<"lt",   0b0011>; // same as l; gnu asm, not in manual
   defm : int_cond_alias<"nz",   0b1001>; // same as ne
   defm : int_cond_alias<"eq",   0b0001>; // same as e
   defm : int_cond_alias<"z",    0b0001>; // same as e
@@ -413,6 +415,13 @@ def : InstAlias<"save", (SAVErr G0, G0, G0)>;
 // def : InstAlias<"set $val, $rd", (ORri IntRegs:$rd, (SETHIi (HI22 imm:$val)), (LO10 imm:$val))>;
 def SET : AsmPseudoInst<(outs IntRegs:$rd), (ins i32imm:$val), "set $val, $rd">;
 
+// setx value, tmp, rd
+// (turns into a sequence of sethi+or+shift, depending on the value)
+def SETX : AsmPseudoInst<(outs I64Regs:$rd),
+  (ins i64imm:$val, I64Regs:$tmp),
+  "setx $val, $tmp, $rd">,
+  Requires<[Is64Bit]>;
+
 // not rd -> xnor rd, %g0, rd
 def : InstAlias<"not $rd", (XNORrr IntRegs:$rd, IntRegs:$rd, G0), 0>;
 
@@ -477,7 +486,6 @@ def : InstAlias<"clrh [$addr]", (STHri MEMri:$addr, G0), 0>;
 def : InstAlias<"clr [$addr]", (STrr MEMrr:$addr, G0), 0>;
 def : InstAlias<"clr [$addr]", (STri MEMri:$addr, G0), 0>;
 
-
 // mov reg_or_imm, rd -> or %g0, reg_or_imm, rd
 def : InstAlias<"mov $rs2, $rd", (ORrr IntRegs:$rd, G0, IntRegs:$rs2)>;
 def : InstAlias<"mov $simm13, $rd", (ORri IntRegs:$rd, G0, i32imm:$simm13)>;
@@ -487,7 +495,7 @@ def : InstAlias<"mov $asr, $rd", (RDASR IntRegs:$rd, ASRRegs:$asr), 0>;
 def : InstAlias<"mov %psr, $rd", (RDPSR IntRegs:$rd), 0>;
 def : InstAlias<"mov %wim, $rd", (RDWIM IntRegs:$rd), 0>;
 def : InstAlias<"mov %tbr, $rd", (RDTBR IntRegs:$rd), 0>;
-def : InstAlias<"mov %pc, $rd", (RDPC IntRegs:$rd), 0>;
+def : InstAlias<"mov %pc, $rd", (RDASR IntRegs:$rd, PC), 0>;
 
 // mov reg_or_imm, specialreg -> wr %g0, reg_or_imm, specialreg
 def : InstAlias<"mov $rs2, $asr", (WRASRrr ASRRegs:$asr, G0, IntRegs:$rs2), 0>;
@@ -498,6 +506,11 @@ def : InstAlias<"mov $rs2, %wim", (WRWIMrr G0, IntRegs:$rs2), 0>;
 def : InstAlias<"mov $simm13, %wim", (WRWIMri G0, i32imm:$simm13), 0>;
 def : InstAlias<"mov $rs2, %tbr", (WRTBRrr G0, IntRegs:$rs2), 0>;
 def : InstAlias<"mov $simm13, %tbr", (WRTBRri G0, i32imm:$simm13), 0>;
+
+// or imm, reg, rd -> or reg, imm, rd
+// Nonstandard GNU extension.
+let EmitPriority = 0 in
+  def : InstAlias<"or $simm13, $rs1, $rd", (ORri IntRegs:$rd, IntRegs:$rs1, simm13Op:$simm13)>;
 
 // End of Section A.3
 
@@ -543,7 +556,14 @@ def : MnemonicAlias<"stsh", "sth">;
 
 def : MnemonicAlias<"stuha", "stha">;
 def : MnemonicAlias<"stsha", "stha">;
+
 def : MnemonicAlias<"stw", "st">, Requires<[HasV9]>;
+def : MnemonicAlias<"stuw", "st">, Requires<[HasV9]>;
+def : MnemonicAlias<"stsw", "st">, Requires<[HasV9]>;
+
+def : MnemonicAlias<"stwa", "sta">, Requires<[HasV9]>;
+def : MnemonicAlias<"stuwa", "sta">, Requires<[HasV9]>;
+def : MnemonicAlias<"stswa", "sta">, Requires<[HasV9]>;
 
 def : MnemonicAlias<"lduw", "ld">, Requires<[HasV9]>;
 def : MnemonicAlias<"lduwa", "lda">, Requires<[HasV9]>;

@@ -15,6 +15,7 @@
 #include "llvm/MC/MCContext.h"
 #include "llvm/MC/MCExpr.h"
 #include "llvm/MC/MCInst.h"
+#include "llvm/MC/MCInstBuilder.h"
 #include "llvm/MC/MCInstrInfo.h"
 #include "llvm/MC/MCObjectFileInfo.h"
 #include "llvm/MC/MCParser/MCAsmLexer.h"
@@ -28,6 +29,7 @@
 #include "llvm/MC/TargetRegistry.h"
 #include "llvm/Support/Casting.h"
 #include "llvm/Support/ErrorHandling.h"
+#include "llvm/Support/MathExtras.h"
 #include "llvm/Support/SMLoc.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/TargetParser/Triple.h"
@@ -86,6 +88,8 @@ class SparcAsmParser : public MCTargetAsmParser {
 
   OperandMatchResultTy parseMembarTag(OperandVector &Operands);
 
+  OperandMatchResultTy parseASITag(OperandVector &Operands);
+
   template <TailRelocKind Kind>
   OperandMatchResultTy parseTailRelocSym(OperandVector &Operands);
 
@@ -118,6 +122,9 @@ class SparcAsmParser : public MCTargetAsmParser {
 
   bool expandSET(MCInst &Inst, SMLoc IDLoc,
                  SmallVectorImpl<MCInst> &Instructions);
+
+  bool expandSETX(MCInst &Inst, SMLoc IDLoc,
+                  SmallVectorImpl<MCInst> &Instructions);
 
   SMLoc getLoc() const { return getParser().getTok().getLoc(); }
 
@@ -233,7 +240,8 @@ private:
     k_Register,
     k_Immediate,
     k_MemoryReg,
-    k_MemoryImm
+    k_MemoryImm,
+    k_ASITag
   } Kind;
 
   SMLoc StartLoc, EndLoc;
@@ -263,6 +271,7 @@ private:
     struct RegOp Reg;
     struct ImmOp Imm;
     struct MemOp Mem;
+    unsigned ASI;
   };
 
 public:
@@ -275,6 +284,7 @@ public:
   bool isMEMrr() const { return Kind == k_MemoryReg; }
   bool isMEMri() const { return Kind == k_MemoryImm; }
   bool isMembarTag() const { return Kind == k_Immediate; }
+  bool isASITag() const { return Kind == k_ASITag; }
   bool isTailRelocSym() const { return Kind == k_Immediate; }
 
   bool isCallTarget() const {
@@ -339,6 +349,11 @@ public:
     return Imm.Val;
   }
 
+  unsigned getASITag() const {
+    assert((Kind == k_ASITag) && "Invalid access!");
+    return ASI;
+  }
+
   unsigned getMemBase() const {
     assert((Kind == k_MemoryReg || Kind == k_MemoryImm) && "Invalid access!");
     return Mem.Base;
@@ -374,6 +389,9 @@ public:
       OS << "Mem: " << getMemBase()
          << "+" << *getMemOff()
          << "\n"; break;
+    case k_ASITag:
+      OS << "ASI tag: " << getASITag() << "\n";
+      break;
     }
   }
 
@@ -431,6 +449,11 @@ public:
     addExpr(Inst, Expr);
   }
 
+  void addASITagOperands(MCInst &Inst, unsigned N) const {
+    assert(N == 1 && "Invalid number of operands!");
+    Inst.addOperand(MCOperand::createImm(getASITag()));
+  }
+
   void addCallTargetOperands(MCInst &Inst, unsigned N) const {
     assert(N == 1 && "Invalid number of operands!");
     addExpr(Inst, getImm());
@@ -464,6 +487,15 @@ public:
                                                  SMLoc E) {
     auto Op = std::make_unique<SparcOperand>(k_Immediate);
     Op->Imm.Val = Val;
+    Op->StartLoc = S;
+    Op->EndLoc = E;
+    return Op;
+  }
+
+  static std::unique_ptr<SparcOperand> CreateASITag(unsigned Val, SMLoc S,
+                                                    SMLoc E) {
+    auto Op = std::make_unique<SparcOperand>(k_ASITag);
+    Op->ASI = Val;
     Op->StartLoc = S;
     Op->EndLoc = E;
     return Op;
@@ -643,6 +675,80 @@ bool SparcAsmParser::expandSET(MCInst &Inst, SMLoc IDLoc,
   return false;
 }
 
+bool SparcAsmParser::expandSETX(MCInst &Inst, SMLoc IDLoc,
+                                SmallVectorImpl<MCInst> &Instructions) {
+  MCOperand MCRegOp = Inst.getOperand(0);
+  MCOperand MCValOp = Inst.getOperand(1);
+  MCOperand MCTmpOp = Inst.getOperand(2);
+  assert(MCRegOp.isReg() && MCTmpOp.isReg());
+  assert(MCValOp.isImm() || MCValOp.isExpr());
+
+  if (!is64Bit())
+    return Error(IDLoc, "setx is only available in 64-bit mode");
+
+  // the imm operand can be either an expression or an immediate.
+  bool IsImm = Inst.getOperand(1).isImm();
+  int64_t ImmValue = IsImm ? MCValOp.getImm() : 0;
+
+  // Small positive immediates effectively becomes a `set`.
+  if (isUInt<32>(ImmValue))
+    return expandSET(Inst, IDLoc, Instructions);
+
+  // Small negative immediates can be expressed directly as a single `or`.
+  bool IsSmallNegative = ImmValue >= -4096 && ImmValue <= 0;
+  if (IsImm && IsSmallNegative) {
+    Instructions.push_back(MCInstBuilder(SP::ORri)
+                               .addReg(MCRegOp.getReg())
+                               .addReg(Sparc::G0)
+                               .addImm(ImmValue));
+    return false;
+  }
+
+  // All other cases simply expand to a fixed sequence.
+  const MCExpr *ValExpr = IsImm ? MCConstantExpr::create(ImmValue, getContext())
+                                : MCValOp.getExpr();
+
+  // sethi %hh(val), tmp
+  Instructions.push_back(
+      MCInstBuilder(SP::SETHIi)
+          .addReg(MCTmpOp.getReg())
+          .addExpr(adjustPICRelocation(SparcMCExpr::VK_Sparc_HH, ValExpr)));
+
+  // sethi %hi(val), rd
+  Instructions.push_back(
+      MCInstBuilder(SP::SETHIi)
+          .addReg(MCRegOp.getReg())
+          .addExpr(adjustPICRelocation(SparcMCExpr::VK_Sparc_HI, ValExpr)));
+
+  // or    tmp, %hm(val), tmp
+  Instructions.push_back(
+      MCInstBuilder(SP::ORri)
+          .addReg(MCTmpOp.getReg())
+          .addReg(MCTmpOp.getReg())
+          .addExpr(adjustPICRelocation(SparcMCExpr::VK_Sparc_HM, ValExpr)));
+
+  // or    rd, %lo(val), rd
+  Instructions.push_back(
+      MCInstBuilder(SP::ORri)
+          .addReg(MCRegOp.getReg())
+          .addReg(MCRegOp.getReg())
+          .addExpr(adjustPICRelocation(SparcMCExpr::VK_Sparc_LO, ValExpr)));
+
+  // sllx  tmp, 32, tmp
+  Instructions.push_back(MCInstBuilder(SP::SLLXri)
+                             .addReg(MCTmpOp.getReg())
+                             .addReg(MCTmpOp.getReg())
+                             .addImm(32));
+
+  // or    tmp, rd, rd
+  Instructions.push_back(MCInstBuilder(SP::ORrr)
+                             .addReg(MCRegOp.getReg())
+                             .addReg(MCTmpOp.getReg())
+                             .addReg(MCRegOp.getReg()));
+
+  return false;
+}
+
 bool SparcAsmParser::MatchAndEmitInstruction(SMLoc IDLoc, unsigned &Opcode,
                                              OperandVector &Operands,
                                              MCStreamer &Out,
@@ -661,6 +767,10 @@ bool SparcAsmParser::MatchAndEmitInstruction(SMLoc IDLoc, unsigned &Opcode,
       break;
     case SP::SET:
       if (expandSET(Inst, IDLoc, Instructions))
+        return true;
+      break;
+    case SP::SETX:
+      if (expandSETX(Inst, IDLoc, Instructions))
         return true;
       break;
     }
@@ -1001,6 +1111,42 @@ OperandMatchResultTy SparcAsmParser::parseMembarTag(OperandVector &Operands) {
   return MatchOperand_Success;
 }
 
+OperandMatchResultTy SparcAsmParser::parseASITag(OperandVector &Operands) {
+  SMLoc S = Parser.getTok().getLoc();
+  SMLoc E = Parser.getTok().getEndLoc();
+  int64_t ASIVal = 0;
+
+  std::unique_ptr<SparcOperand> Mask;
+  if (parseSparcAsmOperand(Mask) == MatchOperand_Success) {
+    if (!Mask->isImm() || !Mask->getImm()->evaluateAsAbsolute(ASIVal) ||
+        ASIVal < 0 || ASIVal > 255) {
+      Error(S, "invalid ASI number, must be between 0 and 255");
+      return MatchOperand_ParseFail;
+    }
+  } else if (getLexer().getKind() == AsmToken::Hash) {
+    SMLoc TagStart = getLexer().peekTok(false).getLoc();
+    Parser.Lex(); // Eat the '#'.
+    auto ASIName = Parser.getTok().getString();
+    auto ASITag = SparcASITag::lookupASITagByName(ASIName);
+    if (!ASITag)
+      ASITag = SparcASITag::lookupASITagByAltName(ASIName);
+    Parser.Lex(); // Eat the identifier token.
+
+    if (!ASITag) {
+      Error(TagStart, "unknown ASI tag");
+      return MatchOperand_ParseFail;
+    }
+
+    ASIVal = ASITag->Encoding;
+  } else {
+    Error(S, "malformed ASI tag");
+    return MatchOperand_ParseFail;
+  }
+
+  Operands.push_back(SparcOperand::CreateASITag(ASIVal, S, E));
+  return MatchOperand_Success;
+}
+
 OperandMatchResultTy SparcAsmParser::parseCallTarget(OperandVector &Operands) {
   SMLoc S = Parser.getTok().getLoc();
   SMLoc E = SMLoc::getFromPointer(S.getPointer() - 1);
@@ -1045,7 +1191,8 @@ SparcAsmParser::parseOperand(OperandVector &Operands, StringRef Mnemonic) {
                                                  Parser.getTok().getLoc()));
     Parser.Lex(); // Eat the [
 
-    if (Mnemonic == "cas" || Mnemonic == "casx" || Mnemonic == "casa") {
+    if (Mnemonic == "cas" || Mnemonic == "casl" || Mnemonic == "casa" ||
+        Mnemonic == "casx" || Mnemonic == "casxl" || Mnemonic == "casxa") {
       SMLoc S = Parser.getTok().getLoc();
       if (getLexer().getKind() != AsmToken::Percent)
         return MatchOperand_NoMatch;
@@ -1075,13 +1222,35 @@ SparcAsmParser::parseOperand(OperandVector &Operands, StringRef Mnemonic) {
     Parser.Lex(); // Eat the ]
 
     // Parse an optional address-space identifier after the address.
-    if (getLexer().is(AsmToken::Integer)) {
+    // This will be either the %asi register, or an immediate constant
+    // expression, or a named tag.
+    if (getLexer().is(AsmToken::Percent)) {
       std::unique_ptr<SparcOperand> Op;
-      ResTy = parseSparcAsmOperand(Op, false);
-      if (ResTy != MatchOperand_Success || !Op)
-        return MatchOperand_ParseFail;
-      Operands.push_back(std::move(Op));
+      if (parseSparcAsmOperand(Op) == MatchOperand_Success && Op) {
+        if (!Op->isReg() || Op->getReg() != Sparc::ASI)
+          return MatchOperand_ParseFail;
+        // Here we patch the MEM operand from [base + %g0] into [base + 0]
+        // as memory operations with ASI tag stored in %asi register needs
+        // to use immediate offset.
+        SparcOperand &OldMemOp = (SparcOperand &)*Operands[Operands.size() - 2];
+        if (OldMemOp.isMEMrr()) {
+          if (OldMemOp.getMemOffsetReg() != Sparc::G0)
+            return MatchOperand_ParseFail;
+          Operands[Operands.size() - 2] = SparcOperand::MorphToMEMri(
+              OldMemOp.getMemBase(),
+              SparcOperand::CreateImm(MCConstantExpr::create(0, getContext()),
+                                      OldMemOp.getStartLoc(),
+                                      OldMemOp.getEndLoc()));
+        }
+        Operands.push_back(std::move(Op));
+        return MatchOperand_Success;
+      }
+      return MatchOperand_ParseFail;
     }
+
+    if (getLexer().is(AsmToken::Integer) || getLexer().is(AsmToken::LParen) ||
+        getLexer().is(AsmToken::Hash))
+      return parseASITag(Operands);
     return MatchOperand_Success;
   }
 
@@ -1140,9 +1309,6 @@ SparcAsmParser::parseSparcAsmOperand(std::unique_ptr<SparcOperand> &Op,
         break;
       case Sparc::TBR:
         Op = SparcOperand::CreateToken("%tbr", S);
-        break;
-      case Sparc::PC:
-        Op = SparcOperand::CreateToken("%pc", S);
         break;
       case Sparc::ICC:
         if (name == "xcc")
@@ -1240,9 +1406,8 @@ bool SparcAsmParser::matchRegisterName(const AsmToken &Tok, MCRegister &RegNo,
       return true;
     }
 
-    // %fprs is an alias of %asr6.
     if (name.equals("fprs")) {
-      RegNo = ASRRegs[6];
+      RegNo = Sparc::FPRS;
       RegKind = SparcOperand::rk_Special;
       return true;
     }
@@ -1447,6 +1612,69 @@ bool SparcAsmParser::matchRegisterName(const AsmToken &Tok, MCRegister &RegNo,
     }
     if (name.equals("pc")) {
       RegNo = Sparc::PC;
+      RegKind = SparcOperand::rk_Special;
+      return true;
+    }
+    if (name.equals("asi")) {
+      RegNo = Sparc::ASI;
+      RegKind = SparcOperand::rk_Special;
+      return true;
+    }
+    if (name.equals("ccr")) {
+      RegNo = Sparc::CCR;
+      RegKind = SparcOperand::rk_Special;
+      return true;
+    }
+    if (name.equals("gl")) {
+      RegNo = Sparc::GL;
+      RegKind = SparcOperand::rk_Special;
+      return true;
+    }
+    if (name.equals("ver")) {
+      RegNo = Sparc::VER;
+      RegKind = SparcOperand::rk_Special;
+      return true;
+    }
+
+    // JPS1 extension - aliases for ASRs
+    // Section A.51 - Read State Register
+    if (name.equals("pcr")) {
+      RegNo = Sparc::ASR16;
+      RegKind = SparcOperand::rk_Special;
+      return true;
+    }
+    if (name.equals("pic")) {
+      RegNo = Sparc::ASR17;
+      RegKind = SparcOperand::rk_Special;
+      return true;
+    }
+    if (name.equals("dcr")) {
+      RegNo = Sparc::ASR18;
+      RegKind = SparcOperand::rk_Special;
+      return true;
+    }
+    if (name.equals("gsr")) {
+      RegNo = Sparc::ASR19;
+      RegKind = SparcOperand::rk_Special;
+      return true;
+    }
+    if (name.equals("softint")) {
+      RegNo = Sparc::ASR22;
+      RegKind = SparcOperand::rk_Special;
+      return true;
+    }
+    if (name.equals("tick_cmpr")) {
+      RegNo = Sparc::ASR23;
+      RegKind = SparcOperand::rk_Special;
+      return true;
+    }
+    if (name.equals("stick") || name.equals("sys_tick")) {
+      RegNo = Sparc::ASR24;
+      RegKind = SparcOperand::rk_Special;
+      return true;
+    }
+    if (name.equals("stick_cmpr") || name.equals("sys_tick_cmpr")) {
+      RegNo = Sparc::ASR25;
       RegKind = SparcOperand::rk_Special;
       return true;
     }
