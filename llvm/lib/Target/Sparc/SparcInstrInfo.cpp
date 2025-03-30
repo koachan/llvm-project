@@ -474,6 +474,8 @@ void SparcInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
   unsigned movOpc     = 0;
   const unsigned *subRegIdx = nullptr;
   bool ExtraG0 = false;
+  bool UseFSRC2 =
+      Subtarget.isV9() && Subtarget.isVIS() && Subtarget.hasFastFSRC2();
 
   const unsigned DW_SubRegsIdx[]  = { SP::sub_even, SP::sub_odd };
   const unsigned DFP_FP_SubRegsIdx[]  = { SP::sub_even, SP::sub_odd };
@@ -490,18 +492,20 @@ void SparcInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
     numSubRegs = 2;
     movOpc     = SP::ORrr;
     ExtraG0 = true;
-  } else if (SP::FPRegsRegClass.contains(DestReg, SrcReg))
-    BuildMI(MBB, I, DL, get(SP::FMOVS), DestReg)
-      .addReg(SrcReg, getKillRegState(KillSrc));
-  else if (SP::DFPRegsRegClass.contains(DestReg, SrcReg)) {
-    if (Subtarget.isV9()) {
-      BuildMI(MBB, I, DL, get(SP::FMOVD), DestReg)
+  } else if (SP::FPRegsRegClass.contains(DestReg, SrcReg)) {
+    // The optimization tip doesn't directly mention this, however, using FSRC2S
+    // can also bring a similar speedup.
+    BuildMI(MBB, I, DL, get(UseFSRC2 ? SP::FSRC2S : SP::FMOVS), DestReg)
         .addReg(SrcReg, getKillRegState(KillSrc));
+  } else if (SP::DFPRegsRegClass.contains(DestReg, SrcReg)) {
+    if (Subtarget.isV9()) {
+      BuildMI(MBB, I, DL, get(UseFSRC2 ? SP::FSRC2 : SP::FMOVD), DestReg)
+          .addReg(SrcReg, getKillRegState(KillSrc));
     } else {
-      // Use two FMOVS instructions.
+      // Use two FSRC2S/FMOVS instructions.
       subRegIdx  = DFP_FP_SubRegsIdx;
       numSubRegs = 2;
-      movOpc     = SP::FMOVS;
+      movOpc = UseFSRC2 ? SP::FSRC2S : SP::FMOVS;
     }
   } else if (SP::QFPRegsRegClass.contains(DestReg, SrcReg)) {
     if (Subtarget.isV9()) {
@@ -509,16 +513,16 @@ void SparcInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
         BuildMI(MBB, I, DL, get(SP::FMOVQ), DestReg)
           .addReg(SrcReg, getKillRegState(KillSrc));
       } else {
-        // Use two FMOVD instructions.
+        // Use two FSRC2/FMOVD instructions.
         subRegIdx  = QFP_DFP_SubRegsIdx;
         numSubRegs = 2;
-        movOpc     = SP::FMOVD;
+        movOpc = UseFSRC2 ? SP::FSRC2 : SP::FMOVD;
       }
     } else {
-      // Use four FMOVS instructions.
+      // Use four FSRC2S/FMOVS instructions.
       subRegIdx  = QFP_FP_SubRegsIdx;
       numSubRegs = 4;
-      movOpc     = SP::FMOVS;
+      movOpc = UseFSRC2 ? SP::FSRC2S : SP::FMOVS;
     }
   } else if (SP::ASRRegsRegClass.contains(DestReg) &&
              SP::IntRegsRegClass.contains(SrcReg)) {

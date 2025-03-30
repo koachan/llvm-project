@@ -97,6 +97,9 @@ def TuneSlowRDPC : SubtargetFeature<"slow-rdpc", "HasSlowRDPC", "true",
 
 def TuneNoPredictor : SubtargetFeature<"no-predictor", "HasNoPredictor", "true",
                                     "Processor has no branch predictor, branches stall execution", []>;
+def TuneFastFSRC2 : SubtargetFeature<"fast-fsrc2", "HasFastFSRC2", "true",
+                                    "Prefer FSRC2 over FMOV to copy FP registers",
+                                    [FeatureV9, FeatureVIS]>;
 
 //==== Features added predmoninantly for LEON subtarget support
 include "LeonFeatures.td"
@@ -191,7 +194,8 @@ def : Proc<"niagara3",        [FeatureV9, FeatureV8Deprecated, UsePopc,
 def : Proc<"niagara4",        [FeatureV9, FeatureV8Deprecated, UsePopc,
                                FeatureVIS, FeatureVIS2, FeatureVIS3,
                                FeatureUA2005, FeatureUA2007, FeatureOSA2011,
-                               FeatureCrypto]>;
+                               FeatureCrypto],
+                              [TuneFastFSRC2]>;
 
 // LEON 2 FT generic
 def : Processor<"leon2", LEON2Itineraries,
