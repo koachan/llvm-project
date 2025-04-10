@@ -431,7 +431,8 @@ def : Pat<(SPselectreg (i64 simm10:$t), i64:$f, imm:$rcond, i64:$rs1),
 } // Predicates = [Is64Bit]
 
 // ATOMICS.
-let Predicates = [Is64Bit, HasV9], Constraints = "$swap = $rd" in {
+let mayLoad = 1, mayStore = 1,
+  Predicates = [Is64Bit, HasV9], Constraints = "$swap = $rd" in {
   def CASXArr: F3_1_asi<3, 0b111110,
                 (outs I64Regs:$rd), (ins I64Regs:$rs1, I64Regs:$rs2,
                                      I64Regs:$swap, ASITag:$asi),
