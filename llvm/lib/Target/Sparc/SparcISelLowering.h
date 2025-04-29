@@ -185,6 +185,65 @@ namespace llvm {
     Instruction *emitTrailingFence(IRBuilderBase &Builder, Instruction *Inst,
                                    AtomicOrdering Ord) const override;
 
+    /// Return true if the target can handle a standalone remainder operation.
+    bool hasStandaloneRem(EVT VT) const override { return false; }
+
+    /// Use bitwise logic to make pairs of compares more efficient.
+    bool convertSetCCLogicToBitwiseLogic(EVT VT) const override { return true; }
+
+    /// Return true if the heuristic to prefer icmp eq zero should be used in
+    /// code gen prepare.
+    bool preferZeroCompareBranch() const override { return true; };
+
+    /// Return true if the target should transform:
+    /// (X & Y) == Y ---> (~X & Y) == 0
+    /// (X & Y) != Y ---> (~X & Y) != 0
+    bool hasAndNotCompare(SDValue Y) const override { return true; };
+
+    /// Return true if the target has a bit-test instruction:
+    ///   (X & (1 << Y)) ==/!= 0
+    bool hasBitTest(SDValue X, SDValue Y) const override;
+
+    /// There are two ways to clear extreme bits (either low or high):
+    /// Mask:    x &  (-1 << y)  (the instcombine canonical form)
+    /// Shifts:  x >> y << y
+    /// Return true if the variant with 2 variable shifts is preferred.
+    /// Return false if there is no preference.
+    bool shouldFoldMaskToVariableShiftPair(SDValue X) const override {
+      return true;
+    }
+
+    /// Should we tranform the IR-optimal check for whether given truncation
+    /// down into KeptBits would be truncating or not:
+    ///   (add %x, (1 << (KeptBits-1))) srccond (1 << KeptBits)
+    /// Into it's more traditional form:
+    ///   ((%x << C) a>> C) dstcond %x
+    /// Return true if we should transform.
+    /// Return false if there is no preference.
+    bool
+    shouldTransformSignedTruncationCheck(EVT XVT,
+                                         unsigned KeptBits) const override {
+      return true;
+    }
+
+    /// Some scheduler, e.g. hybrid, can switch to different scheduling
+    /// heuristics for different nodes. This function returns the preference (or
+    /// none) for the given node.
+    Sched::Preference getSchedulingPreference(SDNode *) const override {
+      return Sched::ILP;
+    }
+
+    /// Return true if a select of constants (select Cond, C1, C2) should be
+    /// transformed into simple math ops with the condition value.
+    bool convertSelectOfConstantsToMath(EVT VT) const override { return true; }
+
+    /// Return true if it is profitable to transform an integer
+    /// multiplication-by-constant into simpler operations like shifts and adds.
+    bool decomposeMulByConstant(LLVMContext &Context, EVT VT,
+                                SDValue C) const override {
+      return true;
+    }
+
     bool shouldInsertFencesForAtomic(const Instruction *I) const override {
       // FIXME: We insert fences for each atomics and generate
       // sub-optimal code for PSO/TSO. (Approximately nobody uses any

@@ -2033,7 +2033,11 @@ SparcTargetLowering::SparcTargetLowering(const TargetMachine &TM,
   // The high cost of branching means that using conditional moves will
   // still be profitable even if the condition is predictable.
   PredictableSelectIsExpensive = !isJumpExpensive();
+  // We have combined load-and-extend instructions so extending values
+  // early on should allow us to save an instruction.
+  EnableExtLdPromotion = true;
 
+  setSchedulingPreference(Sched::ILP);
   setMinFunctionAlignment(Align(4));
 
   computeRegisterProperties(Subtarget->getRegisterInfo());
@@ -3596,6 +3600,13 @@ bool SparcTargetLowering::isCheapToSpeculateCttz(Type *Ty) const {
 bool SparcTargetLowering::isFMAFasterThanFMulAndFAdd(const MachineFunction &MF,
                                                      EVT VT) const {
   return Subtarget->isUA2007() && !Subtarget->useSoftFloat();
+}
+
+bool SparcTargetLowering::hasBitTest(SDValue X, SDValue Y) const {
+  // Given a bit test of the form (X & (1 << Y)) ==/!= 0, we can implement it
+  // with `andcc X, (1 << Y), %g0` if Y is a constant less than 12.
+  auto *C = dyn_cast<ConstantSDNode>(Y);
+  return C && C->getAPIntValue().ult(12);
 }
 
 void SparcTargetLowering::AdjustInstrPostInstrSelection(MachineInstr &MI,
